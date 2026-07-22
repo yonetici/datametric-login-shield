@@ -78,11 +78,6 @@ add_action( 'plugins_loaded', 'dmls_bootstrap_plugin' );
  * @return void
  */
 function dmls_bootstrap_plugin() {
-	load_plugin_textdomain(
-		'datametric-login-shield',
-		false,
-		dirname( DMLS_BASENAME ) . '/languages'
-	);
-
+	// Translations load automatically (WP 4.6+); no load_plugin_textdomain() needed.
 	\Datametric\LoginShield\Plugin::get_instance();
 }

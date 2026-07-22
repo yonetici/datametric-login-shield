@@ -176,7 +176,7 @@ class BruteForceModule implements ModuleInterface {
 
 		$table = Database::table_attempts();
 
-		$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->insert( // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery
 			$table,
 			array(
 				'ip'         => $ip,
@@ -216,8 +216,8 @@ class BruteForceModule implements ModuleInterface {
 
 		$table = Database::table_attempts();
 
-		$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			$wpdb->prepare( "DELETE FROM $table WHERE ip = %s", $ip ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is trusted.
+		$wpdb->query( // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery
+			$wpdb->prepare( "DELETE FROM $table WHERE ip = %s", $ip ) // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is trusted.
 		);
 	}
 
@@ -246,8 +246,8 @@ class BruteForceModule implements ModuleInterface {
 		$minutes = (int) $this->lockout_minutes();
 		$since   = gmdate( 'Y-m-d H:i:s', time() - ( $minutes * MINUTE_IN_SECONDS ) );
 
-		$count = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			$wpdb->prepare( "SELECT COUNT(*) FROM $table WHERE ip = %s AND created_at > %s", $ip, $since ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is trusted.
+		$count = $wpdb->get_var( // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery
+			$wpdb->prepare( "SELECT COUNT(*) FROM $table WHERE ip = %s AND created_at > %s", $ip, $since ) // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is trusted.
 		);
 
 		// FAIL-OPEN: on any DB error, report zero so nobody is blocked.
@@ -269,8 +269,8 @@ class BruteForceModule implements ModuleInterface {
 		$table = Database::table_attempts();
 		$since = gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
 
-		$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			$wpdb->prepare( "DELETE FROM $table WHERE created_at < %s", $since ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is trusted.
+		$wpdb->query( // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery
+			$wpdb->prepare( "DELETE FROM $table WHERE created_at < %s", $since ) // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is trusted.
 		);
 	}
 

@@ -408,7 +408,7 @@ class HideLoginModule implements ModuleInterface {
 	public function redirect_export_data() {
 		// Public, key-validated confirmation link (no nonce by design; verified via wp_validate_user_request_key()).
 		if ( ! empty( $_GET ) && isset( $_GET['action'], $_GET['request_id'], $_GET['confirm_key'] ) && 'confirmaction' === sanitize_key( wp_unslash( $_GET['action'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$request_id = (int) wp_unslash( $_GET['request_id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$request_id = (int) wp_unslash( $_GET['request_id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- cast to int.
 			$key        = sanitize_text_field( wp_unslash( $_GET['confirm_key'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$result     = wp_validate_user_request_key( $request_id, $key );
 			if ( ! is_wp_error( $result ) ) {
