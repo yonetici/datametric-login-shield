@@ -25,7 +25,7 @@ use Datametric\LoginShield\Admin\SettingsPage;
  * Main plugin controller.
  *
  * Collects feature modules (core + anything a Pro add-on adds via the
- * `dls_register_modules` filter), wires their services, then boots them.
+ * `dmls_register_modules` filter), wires their services, then boots them.
  */
 class Plugin {
 
@@ -63,8 +63,8 @@ class Plugin {
 
 		// Keep the schema current and make sure maintenance is scheduled.
 		Database::maybe_upgrade();
-		if ( ! wp_next_scheduled( 'dls_daily_maintenance' ) ) {
-			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'dls_daily_maintenance' );
+		if ( ! wp_next_scheduled( 'dmls_daily_maintenance' ) ) {
+			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'dmls_daily_maintenance' );
 		}
 
 		if ( is_admin() ) {
@@ -80,7 +80,7 @@ class Plugin {
 		 * @param ModuleInterface[] $modules   Core modules.
 		 * @param Container         $container Shared container.
 		 */
-		$modules = apply_filters( 'dls_register_modules', $this->core_modules(), $this->container );
+		$modules = apply_filters( 'dmls_register_modules', $this->core_modules(), $this->container );
 
 		foreach ( (array) $modules as $module ) {
 			if ( $module instanceof ModuleInterface ) {
@@ -106,7 +106,7 @@ class Plugin {
 		 *
 		 * @param Container $container Shared container.
 		 */
-		do_action( 'dls_loaded', $this->container );
+		do_action( 'dmls_loaded', $this->container );
 	}
 
 	/**
@@ -152,14 +152,14 @@ class Plugin {
 		Options::maybe_migrate_legacy();
 		Database::install_all();
 
-		if ( ! wp_next_scheduled( 'dls_daily_maintenance' ) ) {
-			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'dls_daily_maintenance' );
+		if ( ! wp_next_scheduled( 'dmls_daily_maintenance' ) ) {
+			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'dmls_daily_maintenance' );
 		}
 
 		/**
 		 * Fires on plugin activation (before rewrite flush).
 		 */
-		do_action( 'dls_activate' );
+		do_action( 'dmls_activate' );
 
 		flush_rewrite_rules();
 	}
@@ -189,7 +189,7 @@ class Plugin {
 		/**
 		 * Fires on plugin deactivation.
 		 */
-		do_action( 'dls_deactivate' );
+		do_action( 'dmls_deactivate' );
 
 		flush_rewrite_rules();
 	}
@@ -200,9 +200,9 @@ class Plugin {
 	 * @return void
 	 */
 	private static function unschedule_maintenance() {
-		$timestamp = wp_next_scheduled( 'dls_daily_maintenance' );
+		$timestamp = wp_next_scheduled( 'dmls_daily_maintenance' );
 		if ( $timestamp ) {
-			wp_unschedule_event( $timestamp, 'dls_daily_maintenance' );
+			wp_unschedule_event( $timestamp, 'dmls_daily_maintenance' );
 		}
 	}
 }

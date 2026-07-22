@@ -49,7 +49,11 @@ class HideLoginModule implements ModuleInterface {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Register services in the container.
+	 *
+	 * @param Container $container Shared service container.
+	 *
+	 * @return void
 	 */
 	public function register( Container $container ) {
 		// Expose helpers to other modules / the admin screen.
@@ -74,7 +78,7 @@ class HideLoginModule implements ModuleInterface {
 		}
 
 		if ( is_plugin_active_for_network( 'rename-wp-login/rename-wp-login.php' ) ) {
-			deactivate_plugins( DLS_BASENAME );
+			deactivate_plugins( DMLS_BASENAME );
 			add_action( 'network_admin_notices', array( $this, 'admin_notices_plugin_conflict' ) );
 			if ( isset( $_GET['activate'] ) ) {
 				unset( $_GET['activate'] );
@@ -84,7 +88,7 @@ class HideLoginModule implements ModuleInterface {
 		}
 
 		if ( is_plugin_active( 'rename-wp-login/rename-wp-login.php' ) ) {
-			deactivate_plugins( DLS_BASENAME );
+			deactivate_plugins( DMLS_BASENAME );
 			add_action( 'admin_notices', array( $this, 'admin_notices_plugin_conflict' ) );
 			if ( isset( $_GET['activate'] ) ) {
 				unset( $_GET['activate'] );
@@ -93,12 +97,12 @@ class HideLoginModule implements ModuleInterface {
 			return;
 		}
 
-		if ( is_multisite() && is_plugin_active_for_network( DLS_BASENAME ) ) {
+		if ( is_multisite() && is_plugin_active_for_network( DMLS_BASENAME ) ) {
 			add_action( 'wpmu_options', array( $this, 'wpmu_options' ) );
 			add_action( 'update_wpmu_options', array( $this, 'update_wpmu_options' ) );
 
 			add_filter(
-				'network_admin_plugin_action_links_' . DLS_BASENAME,
+				'network_admin_plugin_action_links_' . DMLS_BASENAME,
 				array( $this, 'plugin_action_links' )
 			);
 		}
@@ -112,7 +116,7 @@ class HideLoginModule implements ModuleInterface {
 		add_action( 'wp_loaded', array( $this, 'wp_loaded' ) );
 		add_action( 'setup_theme', array( $this, 'setup_theme' ), 1 );
 
-		add_filter( 'plugin_action_links_' . DLS_BASENAME, array( $this, 'plugin_action_links' ) );
+		add_filter( 'plugin_action_links_' . DMLS_BASENAME, array( $this, 'plugin_action_links' ) );
 		add_filter( 'site_url', array( $this, 'site_url' ), 10, 4 );
 		add_filter( 'network_site_url', array( $this, 'network_site_url' ), 10, 3 );
 		add_filter( 'wp_redirect', array( $this, 'wp_redirect' ), 10, 2 );
@@ -209,10 +213,10 @@ class HideLoginModule implements ModuleInterface {
 	private function wp_template_loader() {
 		global $pagenow;
 
-		$pagenow = 'index.php';
+		$pagenow = 'index.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- deliberately reroutes the request to hide the login page.
 
 		if ( ! defined( 'WP_USE_THEMES' ) ) {
-			define( 'WP_USE_THEMES', true );
+			define( 'WP_USE_THEMES', true ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- WP core constant, intentionally set.
 		}
 
 		wp();
@@ -284,7 +288,7 @@ class HideLoginModule implements ModuleInterface {
 	 * @return string
 	 */
 	public function new_login_url( $scheme = null ) {
-		$url = apply_filters( 'dls_home_url', home_url( '/', $scheme ) );
+		$url = apply_filters( 'dmls_home_url', home_url( '/', $scheme ) );
 
 		if ( get_option( 'permalink_structure' ) ) {
 			return $this->user_trailingslashit( $url . $this->new_login_slug() );
@@ -354,9 +358,11 @@ class HideLoginModule implements ModuleInterface {
 	 * @return void
 	 */
 	public function update_wpmu_options() {
-		if ( empty( $_POST ) || ! check_admin_referer( 'siteoptions' ) ) {
+		if ( empty( $_POST ) ) {
 			return;
 		}
+
+		check_admin_referer( 'siteoptions' );
 
 		if ( isset( $_POST['whl_page'] ) ) {
 			$whl_page = sanitize_title_with_dashes( wp_unslash( $_POST['whl_page'] ) );
@@ -385,7 +391,7 @@ class HideLoginModule implements ModuleInterface {
 	 * @return array
 	 */
 	public function plugin_action_links( $links ) {
-		if ( is_network_admin() && is_plugin_active_for_network( DLS_BASENAME ) ) {
+		if ( is_network_admin() && is_plugin_active_for_network( DMLS_BASENAME ) ) {
 			array_unshift( $links, '<a href="' . esc_url( network_admin_url( 'settings.php' ) ) . '">' . esc_html__( 'Settings', 'datametric-login-shield' ) . '</a>' );
 		} else {
 			array_unshift( $links, '<a href="' . esc_url( admin_url( 'admin.php?page=datametric-login-shield' ) ) . '">' . esc_html__( 'Settings', 'datametric-login-shield' ) . '</a>' );
@@ -439,7 +445,7 @@ class HideLoginModule implements ModuleInterface {
 
 			$_SERVER['REQUEST_URI'] = $this->user_trailingslashit( '/' . str_repeat( '-/', 10 ) );
 
-			$pagenow = 'index.php';
+			$pagenow = 'index.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- deliberately reroutes the request to hide the login page.
 
 		} elseif ( ( isset( $request['path'] ) && untrailingslashit( $request['path'] ) === home_url( $this->new_login_slug(), 'relative' ) )
 			|| ( ! get_option( 'permalink_structure' )
@@ -448,7 +454,7 @@ class HideLoginModule implements ModuleInterface {
 
 			$_SERVER['SCRIPT_NAME'] = $this->new_login_slug();
 
-			$pagenow = 'wp-login.php';
+			$pagenow = 'wp-login.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- deliberately reroutes the request to the hidden login page.
 
 		} elseif ( ( strpos( rawurldecode( $this->request_uri() ), 'wp-register.php' ) !== false
 				|| ( isset( $request['path'] ) && untrailingslashit( $request['path'] ) === site_url( 'wp-register', 'relative' ) ) )
@@ -458,7 +464,7 @@ class HideLoginModule implements ModuleInterface {
 
 			$_SERVER['REQUEST_URI'] = $this->user_trailingslashit( '/' . str_repeat( '-/', 10 ) );
 
-			$pagenow = 'index.php';
+			$pagenow = 'index.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- deliberately reroutes the request to hide the login page.
 		}
 	}
 
@@ -490,9 +496,9 @@ class HideLoginModule implements ModuleInterface {
 		 *
 		 * @param array $request Parsed request URL parts.
 		 */
-		do_action( 'dls_before_redirect', $request );
+		do_action( 'dmls_before_redirect', $request );
 
-		if ( ! ( isset( $_GET['action'] ) && 'postpass' === sanitize_key( wp_unslash( $_GET['action'] ) ) && isset( $_POST['post_password'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! ( isset( $_GET['action'] ) && 'postpass' === sanitize_key( wp_unslash( $_GET['action'] ) ) && isset( $_POST['post_password'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.NonceVerification.Missing
 
 			if ( is_admin() && ! is_user_logged_in() && ! defined( 'WP_CLI' ) && ! defined( 'DOING_AJAX' ) && ! defined( 'DOING_CRON' ) && 'admin-post.php' !== $pagenow && ( ! isset( $request['path'] ) || '/wp-admin/options.php' !== $request['path'] ) ) {
 				wp_safe_redirect( $this->new_redirect_url() );
@@ -562,7 +568,7 @@ class HideLoginModule implements ModuleInterface {
 				if ( is_user_logged_in() ) {
 					$user = wp_get_current_user();
 					if ( ! isset( $_REQUEST['action'] ) ) {
-						$logged_in_redirect = apply_filters( 'dls_logged_in_redirect', $redirect_to, $requested_redirect_to, $user );
+						$logged_in_redirect = apply_filters( 'dmls_logged_in_redirect', $redirect_to, $requested_redirect_to, $user );
 						wp_safe_redirect( $logged_in_redirect );
 						die();
 					}
@@ -761,7 +767,7 @@ class HideLoginModule implements ModuleInterface {
 		if ( ! is_multisite()
 			&& ( strpos( rawurldecode( $this->request_uri() ), 'wp-signup' ) !== false
 				|| strpos( rawurldecode( $this->request_uri() ), 'wp-activate' ) !== false )
-			&& false === apply_filters( 'dls_signup_enable', false ) ) {
+			&& false === apply_filters( 'dmls_signup_enable', false ) ) {
 
 			wp_die( esc_html__( 'This feature is not enabled.', 'datametric-login-shield' ) );
 		}

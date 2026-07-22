@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Resolves the client IP address safely.
  *
  * By default only REMOTE_ADDR is trusted (spoof-proof). Sites behind a trusted
- * reverse proxy can opt into X-Forwarded-For via the `dls_trusted_proxy` filter.
+ * reverse proxy can opt into X-Forwarded-For via the `dmls_trusted_proxy` filter.
  */
 class Ip {
 
@@ -32,7 +32,7 @@ class Ip {
 		 *
 		 * @param bool $trust Default false.
 		 */
-		if ( apply_filters( 'dls_trusted_proxy', false ) && ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+		if ( apply_filters( 'dmls_trusted_proxy', false ) && ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
 			$forwarded = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) );
 			$parts     = explode( ',', $forwarded );
 			$candidate = trim( $parts[0] );

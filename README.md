@@ -15,7 +15,7 @@ Hide your WordPress login URL and lock down access — a modular login-security 
 
 ## Architecture
 
-A small service container + module registry. Each feature is a `ModuleInterface` registered via the `dls_register_modules` filter; a future **Pro** add-on plugs into the same filter and the `dls_settings_tabs` registry without the free plugin referencing it.
+A small service container + module registry. Each feature is a `ModuleInterface` registered via the `dmls_register_modules` filter; a future **Pro** add-on plugs into the same filter and the `dmls_settings_tabs` registry without the free plugin referencing it.
 
 ```
 datametric-login-shield.php   # bootstrap
@@ -51,7 +51,7 @@ composer lint:fix         # auto-fix where possible
 1. Add two repository secrets (Settings → Secrets and variables → Actions):
    - `SVN_USERNAME` — your WordPress.org username.
    - `SVN_PASSWORD` — your WordPress.org password.
-2. Bump the version in `datametric-login-shield.php` (`Version:` header **and** `DLS_VERSION`) and in `readme.txt` (`Stable tag`), and add a changelog entry.
+2. Bump the version in `datametric-login-shield.php` (`Version:` header **and** `DMLS_VERSION`) and in `readme.txt` (`Stable tag`), and add a changelog entry.
 3. Commit, then tag and push:
    ```bash
    git tag 1.1.0

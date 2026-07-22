@@ -147,7 +147,7 @@ class Settings {
 	 */
 	public static function render_field( array $field ) {
 		$key   = $field['key'];
-		$id    = 'dls_' . $key;
+		$id    = 'dmls_' . $key;
 		$value = Options::get( $key, $field['default'] );
 
 		echo '<tr>';

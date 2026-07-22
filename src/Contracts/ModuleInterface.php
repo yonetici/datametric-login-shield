@@ -17,7 +17,7 @@ use Datametric\LoginShield\Container;
  * A feature module.
  *
  * The free plugin ships core modules; a Pro add-on registers additional
- * modules through the `dls_register_modules` filter. Each module wires its
+ * modules through the `dmls_register_modules` filter. Each module wires its
  * services in register() and adds its WordPress hooks in boot().
  */
 interface ModuleInterface {

@@ -7,7 +7,7 @@
  * Author:            Datametric
  * Author URI:        https://www.datametric.com.tr
  * Requires at least: 5.3
- * Tested up to:      6.9
+ * Tested up to:      7.0
  * Requires PHP:      7.2
  * Text Domain:       datametric-login-shield
  * Domain Path:       /languages
@@ -42,46 +42,46 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin constants.
-define( 'DLS_VERSION', '1.1.0' );
-define( 'DLS_FOLDER', 'datametric-login-shield' );
-define( 'DLS_MIN_PHP', '7.2' );
+define( 'DMLS_VERSION', '1.1.0' );
+define( 'DMLS_FOLDER', 'datametric-login-shield' );
+define( 'DMLS_MIN_PHP', '7.2' );
 
-define( 'DLS_FILE', __FILE__ );
-define( 'DLS_URL', plugin_dir_url( __FILE__ ) );
-define( 'DLS_DIR', plugin_dir_path( __FILE__ ) );
-define( 'DLS_BASENAME', plugin_basename( __FILE__ ) );
+define( 'DMLS_FILE', __FILE__ );
+define( 'DMLS_URL', plugin_dir_url( __FILE__ ) );
+define( 'DMLS_DIR', plugin_dir_path( __FILE__ ) );
+define( 'DMLS_BASENAME', plugin_basename( __FILE__ ) );
 
 // Defensive PHP-version guard (the header already blocks activation on old PHP).
-if ( version_compare( PHP_VERSION, DLS_MIN_PHP, '<' ) ) {
+if ( version_compare( PHP_VERSION, DMLS_MIN_PHP, '<' ) ) {
 	return;
 }
 
-require_once DLS_DIR . 'src/Autoloader.php';
+require_once DMLS_DIR . 'src/Autoloader.php';
 
-$dls_autoloader = new \Datametric\LoginShield\Autoloader();
-$dls_autoloader->register();
-$dls_autoloader->add_namespace( 'Datametric\\LoginShield', DLS_DIR . 'src' );
+$dmls_autoloader = new \Datametric\LoginShield\Autoloader();
+$dmls_autoloader->register();
+$dmls_autoloader->add_namespace( 'Datametric\\LoginShield', DMLS_DIR . 'src' );
 
 // Optional Composer autoload (for future third-party libraries).
-if ( file_exists( DLS_DIR . 'vendor/autoload.php' ) ) {
-	require_once DLS_DIR . 'vendor/autoload.php';
+if ( file_exists( DMLS_DIR . 'vendor/autoload.php' ) ) {
+	require_once DMLS_DIR . 'vendor/autoload.php';
 }
 
 register_activation_hook( __FILE__, array( '\Datametric\LoginShield\Plugin', 'activate' ) );
 register_deactivation_hook( __FILE__, array( '\Datametric\LoginShield\Plugin', 'deactivate' ) );
 
-add_action( 'plugins_loaded', 'dls_bootstrap_plugin' );
+add_action( 'plugins_loaded', 'dmls_bootstrap_plugin' );
 
 /**
  * Boot the plugin once all plugins are loaded.
  *
  * @return void
  */
-function dls_bootstrap_plugin() {
+function dmls_bootstrap_plugin() {
 	load_plugin_textdomain(
 		'datametric-login-shield',
 		false,
-		dirname( DLS_BASENAME ) . '/languages'
+		dirname( DMLS_BASENAME ) . '/languages'
 	);
 
 	\Datametric\LoginShield\Plugin::get_instance();

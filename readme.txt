@@ -3,7 +3,7 @@
 Contributors: datametric
 Tags: login, hide login, wp-login, custom login url, security
 Requires at least: 5.3
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 7.2
 Stable tag: 1.1.0
 License: GPLv2 or later

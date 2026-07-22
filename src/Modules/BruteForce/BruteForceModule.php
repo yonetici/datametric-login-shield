@@ -45,7 +45,11 @@ class BruteForceModule implements ModuleInterface {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Register services in the container.
+	 *
+	 * @param Container $container Shared service container.
+	 *
+	 * @return void
 	 */
 	public function register( Container $container ) {}
 
@@ -64,7 +68,7 @@ class BruteForceModule implements ModuleInterface {
 		add_filter( 'authenticate', array( $this, 'check_lockout' ), 30, 3 );
 		add_action( 'wp_login_failed', array( $this, 'record_failure' ) );
 		add_action( 'wp_login', array( $this, 'clear_attempts' ), 10, 2 );
-		add_action( 'dls_daily_maintenance', array( $this, 'prune' ) );
+		add_action( 'dmls_daily_maintenance', array( $this, 'prune' ) );
 	}
 
 	/**
@@ -147,7 +151,7 @@ class BruteForceModule implements ModuleInterface {
 
 		if ( $this->is_locked( $ip ) ) {
 			return new WP_Error(
-				'dls_locked',
+				'dmls_locked',
 				__( 'Too many failed login attempts. Please try again later.', 'datametric-login-shield' )
 			);
 		}
@@ -190,7 +194,7 @@ class BruteForceModule implements ModuleInterface {
 			 * @param string $ip       Client IP.
 			 * @param string $username Attempted username.
 			 */
-			do_action( 'dls_lockout', $ip, (string) $username );
+			do_action( 'dmls_lockout', $ip, (string) $username );
 		}
 	}
 

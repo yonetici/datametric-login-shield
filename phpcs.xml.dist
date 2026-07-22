@@ -37,8 +37,8 @@
 	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
 		<properties>
 			<property name="prefixes" type="array">
-				<element value="dls"/>
-				<element value="DLS"/>
+				<element value="dmls"/>
+				<element value="DMLS"/>
 				<element value="Datametric\LoginShield"/>
 			</property>
 		</properties>

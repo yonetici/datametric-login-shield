@@ -43,7 +43,11 @@ class AuditLogModule implements ModuleInterface {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Register services in the container.
+	 *
+	 * @param Container $container Shared service container.
+	 *
+	 * @return void
 	 */
 	public function register( Container $container ) {}
 
@@ -56,7 +60,7 @@ class AuditLogModule implements ModuleInterface {
 			add_action( 'admin_init', array( $this, 'register_privacy_content' ) );
 		}
 
-		add_action( 'dls_daily_maintenance', array( $this, 'prune' ) );
+		add_action( 'dmls_daily_maintenance', array( $this, 'prune' ) );
 
 		if ( ! Options::get( 'audit_enabled', true ) ) {
 			return;
@@ -65,7 +69,7 @@ class AuditLogModule implements ModuleInterface {
 		add_action( 'wp_login', array( $this, 'on_login' ), 10, 2 );
 		add_action( 'wp_login_failed', array( $this, 'on_login_failed' ) );
 		add_action( 'wp_logout', array( $this, 'on_logout' ) );
-		add_action( 'dls_lockout', array( $this, 'on_lockout' ), 10, 2 );
+		add_action( 'dmls_lockout', array( $this, 'on_lockout' ), 10, 2 );
 	}
 
 	/**
@@ -117,9 +121,11 @@ class AuditLogModule implements ModuleInterface {
 		);
 	}
 
-	/* ---------------------------------------------------------------------
+	/*
+	 * ---------------------------------------------------------------------
 	 * Event recording
-	 * ------------------------------------------------------------------- */
+	 * ---------------------------------------------------------------------
+	 */
 
 	/**
 	 * Record a successful login.
@@ -216,9 +222,11 @@ class AuditLogModule implements ModuleInterface {
 		);
 	}
 
-	/* ---------------------------------------------------------------------
+	/*
+	 * ---------------------------------------------------------------------
 	 * Admin rendering
-	 * ------------------------------------------------------------------- */
+	 * ---------------------------------------------------------------------
+	 */
 
 	/**
 	 * Human labels for event types.
@@ -244,9 +252,9 @@ class AuditLogModule implements ModuleInterface {
 
 		// Settings form (enable / anonymize).
 		echo '<form method="post" class="dls-form">';
-		wp_nonce_field( 'dls_save_settings', 'dls_nonce' );
-		echo '<input type="hidden" name="dls_action" value="save_fields" />';
-		echo '<input type="hidden" name="dls_tab" value="audit-log" />';
+		wp_nonce_field( 'dmls_save_settings', 'dmls_nonce' );
+		echo '<input type="hidden" name="dmls_action" value="save_fields" />';
+		echo '<input type="hidden" name="dmls_tab" value="audit-log" />';
 		Settings::render_fields( 'audit-log' );
 		submit_button( __( 'Save logging settings', 'datametric-login-shield' ) );
 		echo '</form>';
@@ -262,7 +270,7 @@ class AuditLogModule implements ModuleInterface {
 			}
 		}
 
-		$paged = isset( $_GET['dls_paged'] ) ? max( 1, absint( wp_unslash( $_GET['dls_paged'] ) ) ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$paged = isset( $_GET['dmls_paged'] ) ? max( 1, absint( wp_unslash( $_GET['dmls_paged'] ) ) ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		$total  = $this->count_events( $filter );
 		$pages  = (int) ceil( $total / self::PER_PAGE );
@@ -273,8 +281,8 @@ class AuditLogModule implements ModuleInterface {
 		echo '<form method="get" class="dls-log-filter">';
 		echo '<input type="hidden" name="page" value="datametric-login-shield" />';
 		echo '<input type="hidden" name="tab" value="audit-log" />';
-		echo '<label for="dls_event_type" class="screen-reader-text">' . esc_html__( 'Filter by event', 'datametric-login-shield' ) . '</label>';
-		echo '<select name="event_type" id="dls_event_type">';
+		echo '<label for="dmls_event_type" class="screen-reader-text">' . esc_html__( 'Filter by event', 'datametric-login-shield' ) . '</label>';
+		echo '<select name="event_type" id="dmls_event_type">';
 		echo '<option value="">' . esc_html__( 'All events', 'datametric-login-shield' ) . '</option>';
 		foreach ( $labels as $type => $label ) {
 			echo '<option value="' . esc_attr( $type ) . '" ' . selected( $filter, $type, false ) . '>' . esc_html( $label ) . '</option>';
@@ -316,7 +324,7 @@ class AuditLogModule implements ModuleInterface {
 					'page'       => 'datametric-login-shield',
 					'tab'        => 'audit-log',
 					'event_type' => $filter,
-					'dls_paged'  => '%#%',
+					'dmls_paged'  => '%#%',
 				),
 				admin_url( 'admin.php' )
 			);
@@ -363,7 +371,7 @@ class AuditLogModule implements ModuleInterface {
 				$wpdb->prepare( "SELECT COUNT(*) FROM $table WHERE event_type = %s", $filter ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is trusted.
 			);
 		} else {
-			$count = $wpdb->get_var( "SELECT COUNT(*) FROM $table" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery -- table name is trusted, no user input.
+			$count = $wpdb->get_var( "SELECT COUNT(*) FROM $table" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- table name is trusted, no user input.
 		}
 
 		return $wpdb->last_error ? 0 : (int) $count;

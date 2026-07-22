@@ -38,10 +38,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Build distributable plugin (excludes dev files)
+        run: bash build.sh
+
       - name: Run Plugin Check
         uses: wordpress/plugin-check-action@v1
         with:
-          build-dir: "./"
+          # Check exactly what ships to WordPress.org (dev files excluded).
+          build-dir: "./dist/datametric-login-shield"
           # Gate on errors (the WordPress.org hard requirement). Remaining
           # warnings are benign: our own dls_* prefixed hooks that Plugin Check
           # cannot auto-attribute, and $wpdb->prefix table-name interpolation.

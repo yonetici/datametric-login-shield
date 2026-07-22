@@ -12,13 +12,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Reads and writes the namespaced `dls_settings` option, while transparently
+ * Reads and writes the namespaced `dmls_settings` option, while transparently
  * falling back to the legacy WPS Hide Login options (`whl_page`,
  * `whl_redirect_admin`) so that existing installs keep working after switching.
  */
 class Options {
 
-	const OPTION_KEY = 'dls_settings';
+	const OPTION_KEY = 'dmls_settings';
 
 	const DEFAULT_LOGIN_SLUG    = 'login';
 	const DEFAULT_REDIRECT_SLUG = '404';
@@ -97,7 +97,7 @@ class Options {
 	/**
 	 * Resolve the effective login slug, honouring legacy options.
 	 *
-	 * Order: dls_settings -> whl_page (site) -> network whl_page -> default.
+	 * Order: dmls_settings -> whl_page (site) -> network whl_page -> default.
 	 *
 	 * @return string
 	 */
@@ -162,11 +162,11 @@ class Options {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
-		return is_plugin_active_for_network( DLS_BASENAME );
+		return is_plugin_active_for_network( DMLS_BASENAME );
 	}
 
 	/**
-	 * One-time migration of legacy WPS Hide Login options into dls_settings.
+	 * One-time migration of legacy WPS Hide Login options into dmls_settings.
 	 * Legacy options are left untouched so a rollback keeps working.
 	 *
 	 * @return void

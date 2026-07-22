@@ -37,7 +37,11 @@ class HardeningModule implements ModuleInterface {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Register services in the container.
+	 *
+	 * @param Container $container Shared service container.
+	 *
+	 * @return void
 	 */
 	public function register( Container $container ) {}
 

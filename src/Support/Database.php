@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Database {
 
 	const DB_VERSION    = '1';
-	const VERSION_OPTION = 'dls_db_version';
+	const VERSION_OPTION = 'dmls_db_version';
 
 	/**
 	 * Login-attempts table name for the current site.
@@ -27,7 +27,7 @@ class Database {
 	public static function table_attempts() {
 		global $wpdb;
 
-		return $wpdb->prefix . 'dls_login_attempts';
+		return $wpdb->prefix . 'dmls_login_attempts';
 	}
 
 	/**
@@ -38,7 +38,7 @@ class Database {
 	public static function table_events() {
 		global $wpdb;
 
-		return $wpdb->prefix . 'dls_events';
+		return $wpdb->prefix . 'dmls_events';
 	}
 
 	/**

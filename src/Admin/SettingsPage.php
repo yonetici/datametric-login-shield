@@ -17,15 +17,15 @@ use Datametric\LoginShield\Support\Options;
 /**
  * Registers the top-level "Login Shield" menu and renders a tabbed settings UI.
  *
- * Phase-2 / Pro modules add their own tabs through the `dls_settings_tabs`
+ * Phase-2 / Pro modules add their own tabs through the `dmls_settings_tabs`
  * filter and never need to touch this class.
  */
 class SettingsPage {
 
 	const MENU_SLUG    = 'datametric-login-shield';
 	const CAPABILITY   = 'manage_options';
-	const NONCE_ACTION = 'dls_save_settings';
-	const NONCE_FIELD  = 'dls_nonce';
+	const NONCE_ACTION = 'dmls_save_settings';
+	const NONCE_FIELD  = 'dmls_nonce';
 
 	/**
 	 * Transient-style notice to show after a redirect.
@@ -76,16 +76,16 @@ class SettingsPage {
 
 		wp_enqueue_style(
 			'dls-admin',
-			DLS_URL . 'assets/css/admin.css',
+			DMLS_URL . 'assets/css/admin.css',
 			array(),
-			DLS_VERSION
+			DMLS_VERSION
 		);
 
 		wp_enqueue_script(
 			'dls-admin',
-			DLS_URL . 'assets/js/admin.js',
+			DMLS_URL . 'assets/js/admin.js',
 			array(),
-			DLS_VERSION,
+			DMLS_VERSION,
 			true
 		);
 
@@ -144,7 +144,7 @@ class SettingsPage {
 		 *
 		 * @param array $tabs Tab definitions keyed by slug.
 		 */
-		return apply_filters( 'dls_settings_tabs', $tabs );
+		return apply_filters( 'dmls_settings_tabs', $tabs );
 	}
 
 	/**
@@ -157,8 +157,8 @@ class SettingsPage {
 	private function render_registry_form( $tab ) {
 		echo '<form method="post" class="dls-form">';
 		wp_nonce_field( self::NONCE_ACTION, self::NONCE_FIELD );
-		echo '<input type="hidden" name="dls_action" value="save_fields" />';
-		echo '<input type="hidden" name="dls_tab" value="' . esc_attr( $tab ) . '" />';
+		echo '<input type="hidden" name="dmls_action" value="save_fields" />';
+		echo '<input type="hidden" name="dmls_tab" value="' . esc_attr( $tab ) . '" />';
 		Settings::render_fields( $tab );
 		submit_button();
 		echo '</form>';
@@ -189,7 +189,7 @@ class SettingsPage {
 	 * @return void
 	 */
 	public function maybe_handle_post() {
-		if ( ! isset( $_POST['dls_action'] ) ) {
+		if ( ! isset( $_POST['dmls_action'] ) ) {
 			return;
 		}
 
@@ -199,7 +199,7 @@ class SettingsPage {
 
 		check_admin_referer( self::NONCE_ACTION, self::NONCE_FIELD );
 
-		$action = sanitize_key( wp_unslash( $_POST['dls_action'] ) );
+		$action = sanitize_key( wp_unslash( $_POST['dmls_action'] ) );
 
 		switch ( $action ) {
 			case 'save_login_url':
@@ -304,7 +304,7 @@ class SettingsPage {
 	 */
 	private function handle_save_fields() {
 		// Nonce + capability verified in maybe_handle_post().
-		$tab = isset( $_POST['dls_tab'] ) ? sanitize_key( wp_unslash( $_POST['dls_tab'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$tab = isset( $_POST['dmls_tab'] ) ? sanitize_key( wp_unslash( $_POST['dmls_tab'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 		$fields = Settings::fields_for( $tab );
 
@@ -397,7 +397,14 @@ class SettingsPage {
 	 * @return void
 	 */
 	private function redirect_with_notice( $type, $message, $tab ) {
-		set_transient( 'dls_notice_' . get_current_user_id(), array( 'type' => $type, 'message' => $message ), 60 );
+		set_transient(
+			'dmls_notice_' . get_current_user_id(),
+			array(
+				'type'    => $type,
+				'message' => $message,
+			),
+			60
+		);
 
 		wp_safe_redirect( $this->tab_url( $tab ) );
 		exit();
@@ -430,9 +437,9 @@ class SettingsPage {
 			return;
 		}
 
-		$this->notice = get_transient( 'dls_notice_' . get_current_user_id() );
+		$this->notice = get_transient( 'dmls_notice_' . get_current_user_id() );
 		if ( $this->notice ) {
-			delete_transient( 'dls_notice_' . get_current_user_id() );
+			delete_transient( 'dmls_notice_' . get_current_user_id() );
 		}
 
 		$tabs    = $this->tabs();
@@ -440,7 +447,7 @@ class SettingsPage {
 		?>
 		<div class="wrap dls-wrap">
 			<div class="dls-header">
-				<img class="dls-logo" src="<?php echo esc_url( DLS_URL . 'assets/img/logo.svg' ); ?>" alt="" width="40" height="40" />
+				<img class="dls-logo" src="<?php echo esc_url( DMLS_URL . 'assets/img/logo.svg' ); ?>" alt="" width="40" height="40" />
 				<div>
 					<h1 class="dls-title"><?php esc_html_e( 'Datametric Login Shield', 'datametric-login-shield' ); ?></h1>
 					<p class="dls-subtitle"><?php esc_html_e( 'Hide your login and lock down access.', 'datametric-login-shield' ); ?></p>
@@ -475,7 +482,7 @@ class SettingsPage {
 				printf(
 					/* translators: %s: plugin version. */
 					esc_html__( 'Datametric Login Shield %s — the login-security layer.', 'datametric-login-shield' ),
-					esc_html( 'v' . DLS_VERSION )
+					esc_html( 'v' . DMLS_VERSION )
 				);
 				?>
 			</p>
@@ -504,7 +511,7 @@ class SettingsPage {
 				</div>
 				<form method="post" class="dls-inline-form">
 					<?php wp_nonce_field( self::NONCE_ACTION, self::NONCE_FIELD ); ?>
-					<input type="hidden" name="dls_action" value="email_login_url" />
+					<input type="hidden" name="dmls_action" value="email_login_url" />
 					<button type="submit" class="button button-secondary">
 						<?php esc_html_e( 'Email this URL to me', 'datametric-login-shield' ); ?>
 					</button>
@@ -547,22 +554,22 @@ class SettingsPage {
 		?>
 		<form method="post" class="dls-form">
 			<?php wp_nonce_field( self::NONCE_ACTION, self::NONCE_FIELD ); ?>
-			<input type="hidden" name="dls_action" value="save_login_url" />
+			<input type="hidden" name="dmls_action" value="save_login_url" />
 
 			<table class="form-table" role="presentation">
 				<tr>
-					<th scope="row"><label for="dls_login_slug"><?php esc_html_e( 'Login URL', 'datametric-login-shield' ); ?></label></th>
+					<th scope="row"><label for="dmls_login_slug"><?php esc_html_e( 'Login URL', 'datametric-login-shield' ); ?></label></th>
 					<td>
 						<code><?php echo esc_html( $home . ( $perma ? '' : '?' ) ); ?></code>
-						<input name="login_slug" id="dls_login_slug" type="text" value="<?php echo esc_attr( $slug ); ?>" class="regular-text" />
+						<input name="login_slug" id="dmls_login_slug" type="text" value="<?php echo esc_attr( $slug ); ?>" class="regular-text" />
 						<p class="description"><?php esc_html_e( 'The address people will use to reach the login form. Avoid "login" — pick something only you know.', 'datametric-login-shield' ); ?></p>
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="dls_redirect_slug"><?php esc_html_e( 'Redirect URL', 'datametric-login-shield' ); ?></label></th>
+					<th scope="row"><label for="dmls_redirect_slug"><?php esc_html_e( 'Redirect URL', 'datametric-login-shield' ); ?></label></th>
 					<td>
 						<code><?php echo esc_html( $home . ( $perma ? '' : '?' ) ); ?></code>
-						<input name="redirect_slug" id="dls_redirect_slug" type="text" value="<?php echo esc_attr( $redir ); ?>" class="regular-text" />
+						<input name="redirect_slug" id="dmls_redirect_slug" type="text" value="<?php echo esc_attr( $redir ); ?>" class="regular-text" />
 						<p class="description"><?php esc_html_e( 'Where logged-out visitors are sent when they try to reach wp-login.php or wp-admin. Default: 404.', 'datametric-login-shield' ); ?></p>
 					</td>
 				</tr>
@@ -588,7 +595,7 @@ class SettingsPage {
 		?>
 		<form method="post" class="dls-form">
 			<?php wp_nonce_field( self::NONCE_ACTION, self::NONCE_FIELD ); ?>
-			<input type="hidden" name="dls_action" value="save_advanced" />
+			<input type="hidden" name="dmls_action" value="save_advanced" />
 
 			<table class="form-table" role="presentation">
 				<tr>
