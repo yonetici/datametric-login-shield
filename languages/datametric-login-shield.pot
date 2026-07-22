@@ -1,0 +1,204 @@
+# Copyright (C) 2026 Datametric
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Datametric Login Shield 1.0.0\n"
+"Report-Msgid-Bugs-To: https://www.datametric.com.tr/login-shield\n"
+"Last-Translator: Datametric\n"
+"Language-Team: Datametric\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: datametric-login-shield\n"
+
+msgid "Datametric Login Shield"
+msgstr ""
+
+msgid "Login Shield"
+msgstr ""
+
+msgid "Hide your login and lock down access."
+msgstr ""
+
+msgid "Dashboard"
+msgstr ""
+
+msgid "Login URL"
+msgstr ""
+
+msgid "Advanced"
+msgstr ""
+
+msgid "Your login URL"
+msgstr ""
+
+msgid "Copy"
+msgstr ""
+
+msgid "Copied!"
+msgstr ""
+
+msgid "Email this URL to me"
+msgstr ""
+
+msgid "Bookmark this URL. wp-login.php and wp-admin are now blocked for logged-out visitors."
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Login URL hidden"
+msgstr ""
+
+msgid "wp-admin protected for logged-out users"
+msgstr ""
+
+msgid "Change login URL"
+msgstr ""
+
+msgid "Redirect URL"
+msgstr ""
+
+msgid "The login URL cannot be empty."
+msgstr ""
+
+msgid "The login URL cannot contain \"wp-login\"."
+msgstr ""
+
+msgid "A page already exists at this URL. Choose a different login URL."
+msgstr ""
+
+msgid "Settings saved. Your new login URL is shown below — save it now so you do not lock yourself out."
+msgstr ""
+
+msgid "Heads up:"
+msgstr ""
+
+msgid "After saving, you will only be able to log in at the new URL. Make sure you copy or email it to yourself."
+msgstr ""
+
+msgid "Save login URL"
+msgstr ""
+
+msgid "On uninstall"
+msgstr ""
+
+msgid "Delete all Datametric Login Shield data when the plugin is uninstalled."
+msgstr ""
+
+msgid "Save advanced settings"
+msgstr ""
+
+msgid "Coming next"
+msgstr ""
+
+msgid "Brute-force protection & lockouts"
+msgstr ""
+
+msgid "Two-factor authentication"
+msgstr ""
+
+msgid "Login activity & audit log"
+msgstr ""
+
+msgid "IP allow / deny lists"
+msgstr ""
+
+msgid "Custom login page branding"
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+msgid "This feature is not enabled."
+msgstr ""
+
+msgid "This has been disabled"
+msgstr ""
+
+msgid "Protection"
+msgstr ""
+
+msgid "Audit Log"
+msgstr ""
+
+msgid "Brute-force protection"
+msgstr ""
+
+msgid "Block repeated failed login attempts."
+msgstr ""
+
+msgid "Max failed attempts"
+msgstr ""
+
+msgid "Lockout minutes"
+msgstr ""
+
+msgid "Allowlisted IPs"
+msgstr ""
+
+msgid "Too many failed login attempts. Please try again later."
+msgstr ""
+
+msgid "Block REST user enumeration"
+msgstr ""
+
+msgid "Block author enumeration"
+msgstr ""
+
+msgid "Generic login errors"
+msgstr ""
+
+msgid "Disable XML-RPC"
+msgstr ""
+
+msgid "Login failed. Please check your credentials and try again."
+msgstr ""
+
+msgid "Enable logging"
+msgstr ""
+
+msgid "Anonymize IP addresses"
+msgstr ""
+
+msgid "Save logging settings"
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
+msgid "Event"
+msgstr ""
+
+msgid "User"
+msgstr ""
+
+msgid "IP address"
+msgstr ""
+
+msgid "No events recorded yet."
+msgstr ""
+
+msgid "All events"
+msgstr ""
+
+msgid "Filter"
+msgstr ""
+
+msgid "Login"
+msgstr ""
+
+msgid "Failed login"
+msgstr ""
+
+msgid "Lockout"
+msgstr ""
+
+msgid "Logout"
+msgstr ""
+
+msgid "Login activity logging"
+msgstr ""
+
+msgid "Settings saved."
+msgstr ""

@@ -1,0 +1,17 @@
+# Files and folders excluded from the distributable plugin .zip.
+/.git
+/.github
+/.gitignore
+/.distignore
+/dist
+README.md
+/node_modules
+/vendor
+/tests
+/_original
+composer.json
+composer.lock
+phpcs.xml.dist
+build.sh
+*.log
+.DS_Store

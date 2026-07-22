@@ -1,0 +1,226 @@
+/**
+ * Datametric Login Shield — admin panel styles.
+ * Palette: indigo #1E2A4A / teal #12B5A5 / amber #F5A623 (warnings).
+ */
+
+.dls-wrap {
+	--dls-indigo: #1e2a4a;
+	--dls-indigo-600: #2b3c66;
+	--dls-teal: #12b5a5;
+	--dls-teal-700: #0e9488;
+	--dls-amber: #f5a623;
+	--dls-ink: #1f2733;
+	--dls-muted: #6b7280;
+	--dls-line: #e2e6ee;
+	--dls-surface: #ffffff;
+	max-width: 960px;
+}
+
+/* Header */
+.dls-header {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	margin: 16px 0 8px;
+}
+
+.dls-logo {
+	display: block;
+	width: 40px;
+	height: 40px;
+}
+
+.dls-title {
+	margin: 0;
+	font-size: 22px;
+	line-height: 1.2;
+	color: var(--dls-indigo);
+}
+
+.dls-subtitle {
+	margin: 2px 0 0;
+	color: var(--dls-muted);
+	font-size: 13px;
+}
+
+/* Tabs */
+.dls-tabs {
+	margin-top: 12px;
+}
+
+/* Body */
+.dls-body {
+	margin-top: 18px;
+}
+
+/* Cards */
+.dls-cards {
+	display: grid;
+	grid-template-columns: 1.3fr 1fr;
+	gap: 18px;
+}
+
+@media screen and (max-width: 782px) {
+	.dls-cards {
+		grid-template-columns: 1fr;
+	}
+}
+
+.dls-card {
+	background: var(--dls-surface);
+	border: 1px solid var(--dls-line);
+	border-radius: 12px;
+	padding: 20px;
+	box-shadow: 0 1px 2px rgba(30, 42, 74, 0.04);
+}
+
+.dls-card--primary {
+	border-top: 4px solid var(--dls-teal);
+}
+
+.dls-card__label {
+	display: block;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--dls-muted);
+	margin-bottom: 12px;
+}
+
+/* URL row */
+.dls-url-row {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.dls-url-field {
+	flex: 1 1 auto;
+	font-family: Menlo, Consolas, monospace;
+	font-size: 13px;
+	padding: 8px 10px;
+	border: 1px solid var(--dls-line);
+	border-radius: 8px;
+	background: #f7f9fc;
+	color: var(--dls-ink);
+}
+
+.dls-inline-form {
+	margin-top: 12px;
+}
+
+.dls-hint {
+	margin: 12px 0 0;
+	color: var(--dls-muted);
+	font-size: 12.5px;
+}
+
+/* Status list */
+.dls-status {
+	margin: 0 0 16px;
+	padding: 0;
+	list-style: none;
+}
+
+.dls-status li {
+	position: relative;
+	padding-left: 24px;
+	margin: 0 0 8px;
+	color: var(--dls-ink);
+	font-size: 13px;
+}
+
+.dls-status li::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 3px;
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background: #cbd5e1;
+}
+
+.dls-status li.is-on::before {
+	background: var(--dls-teal);
+	box-shadow: 0 0 0 3px rgba(18, 181, 165, 0.18);
+}
+
+.dls-status code {
+	background: #eef2f9;
+	color: var(--dls-indigo);
+}
+
+/* Roadmap */
+.dls-roadmap {
+	margin-top: 18px;
+	border-left: 4px solid var(--dls-indigo);
+}
+
+.dls-roadmap__list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 10px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.dls-roadmap__list li {
+	background: #eef2f9;
+	color: var(--dls-indigo-600);
+	border-radius: 999px;
+	padding: 5px 12px;
+	font-size: 12.5px;
+	font-weight: 500;
+}
+
+/* Forms */
+.dls-form .form-table code {
+	background: #eef2f9;
+	color: var(--dls-indigo);
+}
+
+.dls-warning {
+	background: #fff7e6;
+	border: 1px solid #f4d799;
+	border-left: 4px solid var(--dls-amber);
+	border-radius: 8px;
+	padding: 12px 14px;
+	max-width: 640px;
+	color: #7a5300;
+	font-size: 13px;
+}
+
+/* Audit log */
+.dls-log-filter {
+	margin: 14px 0;
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.dls-log-table {
+	margin-top: 8px;
+}
+
+.dls-log-table th {
+	font-weight: 600;
+}
+
+.dls-log-table code {
+	background: #eef2f9;
+	color: var(--dls-indigo);
+}
+
+/* Notice + footer */
+.dls-notice {
+	margin: 14px 0;
+}
+
+.dls-footer {
+	margin-top: 26px;
+	color: var(--dls-muted);
+	font-size: 12px;
+}

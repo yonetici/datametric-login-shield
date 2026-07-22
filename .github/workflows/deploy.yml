@@ -1,0 +1,35 @@
+name: Deploy to WordPress.org
+
+# Deploys to the WordPress.org plugin directory when a version tag is pushed,
+# e.g. `git tag 1.1.0 && git push origin 1.1.0`.
+# Requires two repository secrets: SVN_USERNAME and SVN_PASSWORD
+# (your WordPress.org account credentials with commit access to the plugin).
+
+on:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+  deploy:
+    name: Deploy to WordPress.org
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: WordPress Plugin Deploy
+        id: deploy
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        with:
+          generate-zip: true
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: datametric-login-shield
+
+      - name: Upload release asset
+        uses: actions/upload-artifact@v4
+        with:
+          name: datametric-login-shield
+          path: ${{ steps.deploy.outputs.zip-path }}

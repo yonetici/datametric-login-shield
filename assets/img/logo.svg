@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Datametric Login Shield">
+  <defs>
+    <linearGradient id="dlsShield" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b3c66"/>
+      <stop offset="1" stop-color="#1e2a4a"/>
+    </linearGradient>
+  </defs>
+  <!-- Shield body -->
+  <path fill="url(#dlsShield)" d="M32 3 9 12v18.4C9 45.6 19.6 57.4 32 61c12.4-3.6 23-15.4 23-30.6V12L32 3Z"/>
+  <!-- Inner ring accent -->
+  <path fill="none" stroke="#12B5A5" stroke-width="2.2" opacity="0.55"
+        d="M32 8.6 14.2 15.6v14.8C14.2 42.6 22.5 52 32 55.2 41.5 52 49.8 42.6 49.8 30.4V15.6L32 8.6Z"/>
+  <!-- Keyhole = letter D negative space -->
+  <circle cx="32" cy="27" r="6.2" fill="#12B5A5"/>
+  <circle cx="32" cy="27" r="2.7" fill="#1e2a4a"/>
+  <path fill="#12B5A5" d="M29.3 30.2h5.4l1.5 10.4a2.7 2.7 0 0 1-2.67 3.1h-2.56A2.7 2.7 0 0 1 27.8 40.6l1.5-10.4Z"/>
+</svg>

@@ -1,0 +1,46 @@
+{
+  "name": "datametric/login-shield",
+  "description": "Hide your WordPress login URL and block access to wp-login.php and the wp-admin directory for logged-out visitors. Modular login-security layer by Datametric.",
+  "keywords": [
+    "login",
+    "hide login",
+    "wp-login",
+    "custom login url",
+    "security"
+  ],
+  "homepage": "https://www.datametric.com.tr/login-shield",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Datametric",
+      "homepage": "https://www.datametric.com.tr",
+      "role": "Developer"
+    }
+  ],
+  "support": {
+    "source": "https://www.datametric.com.tr/login-shield"
+  },
+  "require": {
+    "php": ">=7.2"
+  },
+  "require-dev": {
+    "squizlabs/php_codesniffer": "^3.9",
+    "wp-coding-standards/wpcs": "^3.1",
+    "phpcompatibility/phpcompatibility-wp": "^2.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "Datametric\\LoginShield\\": "src/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  },
+  "scripts": {
+    "lint": "phpcs --standard=phpcs.xml.dist",
+    "lint:fix": "phpcbf --standard=phpcs.xml.dist"
+  }
+}
