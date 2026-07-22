@@ -12,9 +12,14 @@
 	<arg name="extensions" value="php"/>
 	<arg value="sp"/>
 
-	<rule ref="WordPress-Core"/>
+	<rule ref="WordPress-Core">
+		<!-- We autoload via PSR-4, not the core class-file naming convention. -->
+		<exclude name="WordPress.Files.FileName"/>
+	</rule>
 	<rule ref="WordPress-Docs"/>
-	<rule ref="WordPress-Extra"/>
+	<rule ref="WordPress-Extra">
+		<exclude name="WordPress.Files.FileName"/>
+	</rule>
 
 	<config name="minimum_supported_wp_version" value="5.3"/>
 	<config name="testVersion" value="7.2-"/>
@@ -24,6 +29,17 @@
 		<properties>
 			<property name="text_domain" type="array">
 				<element value="datametric-login-shield"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- Declare our valid prefixes so PrefixAllGlobals recognizes them. -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="dls"/>
+				<element value="DLS"/>
+				<element value="Datametric\LoginShield"/>
 			</property>
 		</properties>
 	</rule>

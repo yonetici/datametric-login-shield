@@ -171,7 +171,12 @@ class Plugin {
 	 */
 	public static function deactivate() {
 		if ( is_multisite() ) {
-			$site_ids = get_sites( array( 'fields' => 'ids', 'number' => 0 ) );
+			$site_ids = get_sites(
+				array(
+					'fields' => 'ids',
+					'number' => 0,
+				)
+			);
 			foreach ( (array) $site_ids as $site_id ) {
 				switch_to_blog( $site_id );
 				self::unschedule_maintenance();

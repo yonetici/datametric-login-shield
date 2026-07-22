@@ -89,7 +89,12 @@ class Database {
 	 */
 	public static function install_all() {
 		if ( is_multisite() ) {
-			$site_ids = get_sites( array( 'fields' => 'ids', 'number' => 0 ) );
+			$site_ids = get_sites(
+				array(
+					'fields' => 'ids',
+					'number' => 0,
+				)
+			);
 
 			foreach ( (array) $site_ids as $site_id ) {
 				switch_to_blog( $site_id );
@@ -125,8 +130,8 @@ class Database {
 
 		// Table identifiers cannot be parameterized; names are built from the
 		// trusted $wpdb->prefix, not user input.
-		$wpdb->query( "DROP TABLE IF EXISTS $attempts" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery
-		$wpdb->query( "DROP TABLE IF EXISTS $events" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery
+		$wpdb->query( "DROP TABLE IF EXISTS $attempts" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+		$wpdb->query( "DROP TABLE IF EXISTS $events" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
 
 		delete_option( self::VERSION_OPTION );
 	}

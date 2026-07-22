@@ -226,11 +226,9 @@ class SettingsPage {
 	 * @return void
 	 */
 	private function handle_save_login_url() {
-		$raw_slug     = isset( $_POST['login_slug'] ) ? wp_unslash( $_POST['login_slug'] ) : '';
-		$raw_redirect = isset( $_POST['redirect_slug'] ) ? wp_unslash( $_POST['redirect_slug'] ) : '';
-
-		$login_slug    = sanitize_title_with_dashes( $raw_slug );
-		$redirect_slug = sanitize_title_with_dashes( $raw_redirect );
+		// Nonce + capability are verified centrally in maybe_handle_post().
+		$login_slug    = isset( $_POST['login_slug'] ) ? sanitize_title_with_dashes( wp_unslash( $_POST['login_slug'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$redirect_slug = isset( $_POST['redirect_slug'] ) ? sanitize_title_with_dashes( wp_unslash( $_POST['redirect_slug'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 		$error = $this->validate_login_slug( $login_slug );
 
@@ -305,7 +303,8 @@ class SettingsPage {
 	 * @return void
 	 */
 	private function handle_save_fields() {
-		$tab = isset( $_POST['dls_tab'] ) ? sanitize_key( wp_unslash( $_POST['dls_tab'] ) ) : '';
+		// Nonce + capability verified in maybe_handle_post().
+		$tab = isset( $_POST['dls_tab'] ) ? sanitize_key( wp_unslash( $_POST['dls_tab'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 		$fields = Settings::fields_for( $tab );
 
@@ -316,7 +315,7 @@ class SettingsPage {
 		$values = array();
 		foreach ( $fields as $field ) {
 			$key = $field['key'];
-			$raw = array_key_exists( $key, $_POST ) ? wp_unslash( $_POST[ $key ] ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- sanitized per-field below.
+			$raw = array_key_exists( $key, $_POST ) ? wp_unslash( $_POST[ $key ] ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Missing -- sanitized per-field below; nonce verified in maybe_handle_post().
 			$values[ $key ] = Settings::sanitize_value( $field, $raw );
 		}
 
@@ -337,7 +336,8 @@ class SettingsPage {
 	private function handle_save_advanced() {
 		Options::update(
 			array(
-				'uninstall_purge' => ! empty( $_POST['uninstall_purge'] ),
+				// Nonce + capability verified in maybe_handle_post().
+				'uninstall_purge' => ! empty( $_POST['uninstall_purge'] ), // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			)
 		);
 

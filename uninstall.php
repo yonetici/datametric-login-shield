@@ -36,8 +36,8 @@ function dls_uninstall_current_site() {
 	// Table names are built from the trusted $wpdb->prefix, not user input.
 	$attempts = $wpdb->prefix . 'dls_login_attempts';
 	$events   = $wpdb->prefix . 'dls_events';
-	$wpdb->query( "DROP TABLE IF EXISTS $attempts" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery
-	$wpdb->query( "DROP TABLE IF EXISTS $events" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery
+	$wpdb->query( "DROP TABLE IF EXISTS $attempts" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+	$wpdb->query( "DROP TABLE IF EXISTS $events" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
 
 	flush_rewrite_rules();
 }
@@ -49,10 +49,15 @@ if ( $dls_timestamp ) {
 }
 
 if ( is_multisite() ) {
-	$site_ids = get_sites( array( 'fields' => 'ids' ) );
+	$dls_site_ids = get_sites(
+		array(
+			'fields' => 'ids',
+			'number' => 0,
+		)
+	);
 
-	foreach ( (array) $site_ids as $site_id ) {
-		switch_to_blog( $site_id );
+	foreach ( (array) $dls_site_ids as $dls_site_id ) {
+		switch_to_blog( $dls_site_id );
 		dls_uninstall_current_site();
 		restore_current_blog();
 	}

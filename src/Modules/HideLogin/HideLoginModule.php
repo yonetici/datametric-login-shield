@@ -234,8 +234,9 @@ class HideLoginModule implements ModuleInterface {
 
 		foreach ( $all_toolbar_nodes as $node ) {
 			if ( preg_match( '/^blog-(\d+)(.*)/', $node->id, $matches ) ) {
-				$blog_id = $matches[1];
-				if ( $login_slug = $this->new_login_slug( $blog_id ) ) {
+				$blog_id    = $matches[1];
+				$login_slug = $this->new_login_slug( $blog_id );
+				if ( $login_slug ) {
 					if ( ! $matches[2] || '-d' === $matches[2] ) {
 						$args       = $node;
 						$old_href   = $args->href;
@@ -353,20 +354,23 @@ class HideLoginModule implements ModuleInterface {
 	 * @return void
 	 */
 	public function update_wpmu_options() {
-		if ( ! empty( $_POST ) && check_admin_referer( 'siteoptions' ) ) {
-			if ( isset( $_POST['whl_page'] )
-				&& ( $whl_page = sanitize_title_with_dashes( wp_unslash( $_POST['whl_page'] ) ) )
-				&& false === strpos( $whl_page, 'wp-login' )
-				&& ! in_array( $whl_page, $this->forbidden_slugs(), true ) ) {
+		if ( empty( $_POST ) || ! check_admin_referer( 'siteoptions' ) ) {
+			return;
+		}
 
+		if ( isset( $_POST['whl_page'] ) ) {
+			$whl_page = sanitize_title_with_dashes( wp_unslash( $_POST['whl_page'] ) );
+
+			if ( $whl_page && false === strpos( $whl_page, 'wp-login' ) && ! in_array( $whl_page, $this->forbidden_slugs(), true ) ) {
 				update_site_option( 'whl_page', $whl_page );
 				flush_rewrite_rules( true );
 			}
+		}
 
-			if ( isset( $_POST['whl_redirect_admin'] )
-				&& ( $whl_redirect_admin = sanitize_title_with_dashes( wp_unslash( $_POST['whl_redirect_admin'] ) ) )
-				&& false === strpos( $whl_redirect_admin, '404' ) ) {
+		if ( isset( $_POST['whl_redirect_admin'] ) ) {
+			$whl_redirect_admin = sanitize_title_with_dashes( wp_unslash( $_POST['whl_redirect_admin'] ) );
 
+			if ( $whl_redirect_admin && false === strpos( $whl_redirect_admin, '404' ) ) {
 				update_site_option( 'whl_redirect_admin', $whl_redirect_admin );
 				flush_rewrite_rules( true );
 			}
@@ -515,27 +519,31 @@ class HideLoginModule implements ModuleInterface {
 
 			} elseif ( $this->wp_login_php ) {
 
-				if ( ( $referer = wp_get_referer() )
-					&& strpos( $referer, 'wp-activate.php' ) !== false
-					&& ( $referer = wp_parse_url( $referer ) )
-					&& ! empty( $referer['query'] ) ) {
+				$referer = wp_get_referer();
 
-					parse_str( $referer['query'], $referer );
+				if ( $referer && false !== strpos( $referer, 'wp-activate.php' ) ) {
+					$referer = wp_parse_url( $referer );
 
-					@require_once WPINC . '/ms-functions.php';
+					if ( ! empty( $referer['query'] ) ) {
+						parse_str( $referer['query'], $referer );
 
-					if ( ! empty( $referer['key'] )
-						&& ( $result = wpmu_activate_signup( $referer['key'] ) )
-						&& is_wp_error( $result )
-						&& ( 'already_active' === $result->get_error_code()
-							|| 'blog_taken' === $result->get_error_code() ) ) {
+						require_once WPINC . '/ms-functions.php';
 
-						wp_safe_redirect(
-							$this->new_login_url()
-							. ( ! empty( $this->query_string() ) ? '?' . $this->query_string() : '' )
-						);
+						if ( ! empty( $referer['key'] ) ) {
+							$result = wpmu_activate_signup( $referer['key'] );
 
-						die;
+							if ( is_wp_error( $result )
+								&& ( 'already_active' === $result->get_error_code()
+									|| 'blog_taken' === $result->get_error_code() ) ) {
+
+								wp_safe_redirect(
+									$this->new_login_url()
+									. ( ! empty( $this->query_string() ) ? '?' . $this->query_string() : '' )
+								);
+
+								die;
+							}
+						}
 					}
 				}
 
