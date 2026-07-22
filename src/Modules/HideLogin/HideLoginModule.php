@@ -671,7 +671,7 @@ class HideLoginModule implements ModuleInterface {
 
 		if ( isset( $_POST['post_password'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			global $current_user;
-			$posted_password = wp_unslash( $_POST['post_password'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- a password must not be altered.
+			$posted_password = wp_unslash( $_POST['post_password'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Missing -- a password must not be altered; this is WordPress core's own post-password flow.
 			if ( ! is_user_logged_in() && is_wp_error( wp_authenticate_username_password( null, $current_user->user_login, $posted_password ) ) ) {
 				return $origin_url;
 			}
