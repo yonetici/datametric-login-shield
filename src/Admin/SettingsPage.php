@@ -199,19 +199,32 @@ class SettingsPage {
 
 		check_admin_referer( self::NONCE_ACTION, self::NONCE_FIELD );
 
+		// Nonce + capability are verified above, so every $_POST read below is
+		// provably gated. Inputs are read and sanitized here and passed to the
+		// handlers as arguments; the handlers never touch superglobals.
 		$action = sanitize_key( wp_unslash( $_POST['dmls_action'] ) );
 
 		switch ( $action ) {
 			case 'save_login_url':
-				$this->handle_save_login_url();
+				$login_slug    = isset( $_POST['login_slug'] ) ? sanitize_title_with_dashes( wp_unslash( $_POST['login_slug'] ) ) : '';
+				$redirect_slug = isset( $_POST['redirect_slug'] ) ? sanitize_title_with_dashes( wp_unslash( $_POST['redirect_slug'] ) ) : '';
+				$this->handle_save_login_url( $login_slug, $redirect_slug );
 				break;
 
 			case 'save_advanced':
-				$this->handle_save_advanced();
+				$this->handle_save_advanced( ! empty( $_POST['uninstall_purge'] ) );
 				break;
 
 			case 'save_fields':
-				$this->handle_save_fields();
+				$tab    = isset( $_POST['dmls_tab'] ) ? sanitize_key( wp_unslash( $_POST['dmls_tab'] ) ) : '';
+				$values = array();
+				foreach ( Settings::fields_for( $tab ) as $field ) {
+					$key = $field['key'];
+					// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized by the field-type sanitizer on the next line.
+					$raw            = array_key_exists( $key, $_POST ) ? wp_unslash( $_POST[ $key ] ) : null;
+					$values[ $key ] = Settings::sanitize_value( $field, $raw );
+				}
+				$this->handle_save_fields( $tab, $values );
 				break;
 
 			case 'email_login_url':
@@ -223,13 +236,12 @@ class SettingsPage {
 	/**
 	 * Save login slug + redirect slug.
 	 *
+	 * @param string $login_slug    Sanitized login slug.
+	 * @param string $redirect_slug Sanitized redirect slug.
+	 *
 	 * @return void
 	 */
-	private function handle_save_login_url() {
-		// Nonce + capability are verified centrally in maybe_handle_post().
-		$login_slug    = isset( $_POST['login_slug'] ) ? sanitize_title_with_dashes( wp_unslash( $_POST['login_slug'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$redirect_slug = isset( $_POST['redirect_slug'] ) ? sanitize_title_with_dashes( wp_unslash( $_POST['redirect_slug'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-
+	private function handle_save_login_url( $login_slug, $redirect_slug ) {
 		$error = $this->validate_login_slug( $login_slug );
 
 		if ( $error ) {
@@ -298,25 +310,16 @@ class SettingsPage {
 	}
 
 	/**
-	 * Save fields registered under a module tab via the Settings registry.
+	 * Persist fields registered under a module tab via the Settings registry.
+	 *
+	 * @param string               $tab    Tab slug.
+	 * @param array<string, mixed> $values Already-sanitized values keyed by field.
 	 *
 	 * @return void
 	 */
-	private function handle_save_fields() {
-		// Nonce + capability verified in maybe_handle_post().
-		$tab = isset( $_POST['dmls_tab'] ) ? sanitize_key( wp_unslash( $_POST['dmls_tab'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-
-		$fields = Settings::fields_for( $tab );
-
-		if ( empty( $fields ) ) {
+	private function handle_save_fields( $tab, array $values ) {
+		if ( '' === $tab || empty( $values ) ) {
 			$this->redirect_with_notice( 'error', __( 'Nothing to save.', 'datametric-login-shield' ), $tab ? $tab : 'dashboard' );
-		}
-
-		$values = array();
-		foreach ( $fields as $field ) {
-			$key = $field['key'];
-			$raw = array_key_exists( $key, $_POST ) ? wp_unslash( $_POST[ $key ] ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Missing -- sanitized per-field below; nonce verified in maybe_handle_post().
-			$values[ $key ] = Settings::sanitize_value( $field, $raw );
 		}
 
 		Options::update( $values );
@@ -331,13 +334,14 @@ class SettingsPage {
 	/**
 	 * Save advanced settings (uninstall behaviour).
 	 *
+	 * @param bool $purge Whether to delete all data on uninstall.
+	 *
 	 * @return void
 	 */
-	private function handle_save_advanced() {
+	private function handle_save_advanced( $purge ) {
 		Options::update(
 			array(
-				// Nonce + capability verified in maybe_handle_post().
-				'uninstall_purge' => ! empty( $_POST['uninstall_purge'] ), // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				'uninstall_purge' => (bool) $purge,
 			)
 		);
 

@@ -2,7 +2,7 @@
 
 Contributors: datametric
 Tags: login, hide login, wp-login, custom login url, security
-Requires at least: 5.3
+Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 7.2
 Stable tag: 1.1.0
@@ -36,7 +36,7 @@ Two-factor authentication with authenticator apps, IP allow/deny lists, CAPTCHA 
 
 = Compatibility =
 
-Requires WordPress 5.3 or higher. The registration form, lost-password form, login widget and expired sessions keep working. It is compatible with plugins that hook into the login form (BuddyPress, bbPress, WooCommerce, and similar). As with any login-URL plugin, it cannot help with themes or plugins that *hardcode* `wp-login.php`.
+Requires WordPress 6.2 or higher. The registration form, lost-password form, login widget and expired sessions keep working. It is compatible with plugins that hook into the login form (BuddyPress, bbPress, WooCommerce, and similar). As with any login-URL plugin, it cannot help with themes or plugins that *hardcode* `wp-login.php`.
 
 == Installation ==
 
@@ -89,6 +89,8 @@ Datametric Login Shield is a fork of **WPS Hide Login** (GPLv2 or later), origin
 * New: login audit log (7-day history) with event filtering and optional IP anonymization.
 * New: Protection and Audit Log tabs in the admin panel.
 * Privacy: added a detailed Privacy section and integration with the WordPress privacy-policy generator; all data is removed on uninstall when enabled.
+* Hardening: all custom-table queries use the %i identifier placeholder in wpdb::prepare() (WordPress 6.2+) for safe dynamic table names; admin form handlers read input only after nonce/capability verification.
+* Now requires WordPress 6.2 or higher.
 
 = 1.0.0 =
 * Initial release under the Datametric brand.

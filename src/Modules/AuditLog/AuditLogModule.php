@@ -193,7 +193,7 @@ class AuditLogModule implements ModuleInterface {
 			$ip = Ip::anonymize( $ip );
 		}
 
-		$wpdb->insert( // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery
+		$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom log table; $wpdb->insert() escapes values internally.
 			Database::table_events(),
 			array(
 				'event_type' => substr( $type, 0, 32 ),
@@ -217,8 +217,8 @@ class AuditLogModule implements ModuleInterface {
 		$table = Database::table_events();
 		$since = gmdate( 'Y-m-d H:i:s', time() - ( self::RETENTION_DAYS * DAY_IN_SECONDS ) );
 
-		$wpdb->query( // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery
-			$wpdb->prepare( "DELETE FROM $table WHERE created_at < %s", $since ) // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is trusted.
+		$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom log table, no core API.
+			$wpdb->prepare( 'DELETE FROM %i WHERE created_at < %s', $table, $since )
 		);
 	}
 
@@ -367,11 +367,13 @@ class AuditLogModule implements ModuleInterface {
 		$table = Database::table_events();
 
 		if ( '' !== $filter ) {
-			$count = $wpdb->get_var( // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery
-				$wpdb->prepare( "SELECT COUNT(*) FROM $table WHERE event_type = %s", $filter ) // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is trusted.
+			$count = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom log table, no core API.
+				$wpdb->prepare( 'SELECT COUNT(*) FROM %i WHERE event_type = %s', $table, $filter )
 			);
 		} else {
-			$count = $wpdb->get_var( "SELECT COUNT(*) FROM $table" ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- table name is trusted, no user input.
+			$count = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom log table, no core API.
+				$wpdb->prepare( 'SELECT COUNT(*) FROM %i', $table )
+			);
 		}
 
 		return $wpdb->last_error ? 0 : (int) $count;
@@ -392,12 +394,12 @@ class AuditLogModule implements ModuleInterface {
 		$table = Database::table_events();
 
 		if ( '' !== $filter ) {
-			$rows = $wpdb->get_results( // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery
-				$wpdb->prepare( "SELECT event_type, ip, username, user_id, created_at FROM $table WHERE event_type = %s ORDER BY created_at DESC LIMIT %d OFFSET %d", $filter, $limit, $offset ) // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is trusted.
+			$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom log table, no core API.
+				$wpdb->prepare( 'SELECT event_type, ip, username, user_id, created_at FROM %i WHERE event_type = %s ORDER BY created_at DESC LIMIT %d OFFSET %d', $table, $filter, $limit, $offset )
 			);
 		} else {
-			$rows = $wpdb->get_results( // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery
-				$wpdb->prepare( "SELECT event_type, ip, username, user_id, created_at FROM $table ORDER BY created_at DESC LIMIT %d OFFSET %d", $limit, $offset ) // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is trusted.
+			$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom log table, no core API.
+				$wpdb->prepare( 'SELECT event_type, ip, username, user_id, created_at FROM %i ORDER BY created_at DESC LIMIT %d OFFSET %d', $table, $limit, $offset )
 			);
 		}
 

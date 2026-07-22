@@ -6,7 +6,7 @@
  * Version:           1.1.0
  * Author:            Datametric
  * Author URI:        https://www.datametric.com.tr
- * Requires at least: 5.3
+ * Requires at least: 6.2
  * Tested up to:      7.0
  * Requires PHP:      7.2
  * Text Domain:       datametric-login-shield
