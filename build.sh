@@ -10,7 +10,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DIST="${ROOT}/dist"
 STAGE="${DIST}/${SLUG}"
 
-VERSION="$(grep -oE "define\( 'DLS_VERSION', '[^']+'" "${ROOT}/${SLUG}.php" | grep -oE "[0-9]+\.[0-9]+\.[0-9]+" || echo "dev")"
+VERSION="$(grep -oE "define\( 'DMLS_VERSION', '[^']+'" "${ROOT}/${SLUG}.php" | grep -oE "[0-9]+\.[0-9]+\.[0-9]+" || echo "dev")"
 
 echo "Building ${SLUG} v${VERSION}…"
 
