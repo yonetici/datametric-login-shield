@@ -157,7 +157,7 @@ class HardeningModule implements ModuleInterface {
 
 		// Only react to the numeric ?author= query used for scanning.
 		if ( isset( $_GET['author'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only public request.
-			$author = sanitize_text_field( wp_unslash( $_GET['author'] ) );
+			$author = sanitize_text_field( wp_unslash( $_GET['author'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only request routing, no state change.
 			if ( '' !== $author && is_numeric( $author ) ) {
 				// 302 (temporary): a later toggle-off must not stay cached by clients.
 				wp_safe_redirect( home_url( '/' ), 302 );

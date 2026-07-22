@@ -80,7 +80,7 @@ class HideLoginModule implements ModuleInterface {
 		if ( is_plugin_active_for_network( 'rename-wp-login/rename-wp-login.php' ) ) {
 			deactivate_plugins( DMLS_BASENAME );
 			add_action( 'network_admin_notices', array( $this, 'admin_notices_plugin_conflict' ) );
-			if ( isset( $_GET['activate'] ) ) {
+			if ( isset( $_GET['activate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only request routing, no state change.
 				unset( $_GET['activate'] );
 			}
 
@@ -90,7 +90,7 @@ class HideLoginModule implements ModuleInterface {
 		if ( is_plugin_active( 'rename-wp-login/rename-wp-login.php' ) ) {
 			deactivate_plugins( DMLS_BASENAME );
 			add_action( 'admin_notices', array( $this, 'admin_notices_plugin_conflict' ) );
-			if ( isset( $_GET['activate'] ) ) {
+			if ( isset( $_GET['activate'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only request routing, no state change.
 				unset( $_GET['activate'] );
 			}
 
@@ -449,8 +449,8 @@ class HideLoginModule implements ModuleInterface {
 
 		} elseif ( ( isset( $request['path'] ) && untrailingslashit( $request['path'] ) === home_url( $this->new_login_slug(), 'relative' ) )
 			|| ( ! get_option( 'permalink_structure' )
-				&& isset( $_GET[ $this->new_login_slug() ] )
-				&& empty( $_GET[ $this->new_login_slug() ] ) ) ) {
+				&& isset( $_GET[ $this->new_login_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only request routing, no state change.
+				&& empty( $_GET[ $this->new_login_slug() ] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only request routing, no state change.
 
 			$_SERVER['SCRIPT_NAME'] = $this->new_login_slug();
 
@@ -505,7 +505,7 @@ class HideLoginModule implements ModuleInterface {
 				die();
 			}
 
-			if ( ! is_user_logged_in() && isset( $_GET['wc-ajax'] ) && 'profile.php' === $pagenow ) {
+			if ( ! is_user_logged_in() && isset( $_GET['wc-ajax'] ) && 'profile.php' === $pagenow ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only request routing, no state change.
 				wp_safe_redirect( $this->new_redirect_url() );
 				die();
 			}
@@ -561,13 +561,13 @@ class HideLoginModule implements ModuleInterface {
 				$redirect_to = admin_url();
 
 				$requested_redirect_to = '';
-				if ( isset( $_REQUEST['redirect_to'] ) ) {
+				if ( isset( $_REQUEST['redirect_to'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only request routing, no state change.
 					$requested_redirect_to = esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				}
 
 				if ( is_user_logged_in() ) {
 					$user = wp_get_current_user();
-					if ( ! isset( $_REQUEST['action'] ) ) {
+					if ( ! isset( $_REQUEST['action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only request routing, no state change.
 						$logged_in_redirect = apply_filters( 'dmls_logged_in_redirect', $redirect_to, $requested_redirect_to, $user );
 						wp_safe_redirect( $logged_in_redirect );
 						die();
@@ -678,7 +678,7 @@ class HideLoginModule implements ModuleInterface {
 		}
 
 		if ( ! is_user_logged_in() ) {
-			if ( file_exists( WP_CONTENT_DIR . '/plugins/gravityforms/gravityforms.php' ) && isset( $_GET['gf_page'] ) ) {
+			if ( file_exists( WP_CONTENT_DIR . '/plugins/gravityforms/gravityforms.php' ) && isset( $_GET['gf_page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only request routing, no state change.
 				return $origin_url;
 			}
 		}

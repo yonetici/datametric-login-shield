@@ -174,7 +174,7 @@ class SettingsPage {
 		$default = 'dashboard';
 
 		if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only navigation.
-			$tab = sanitize_key( wp_unslash( $_GET['tab'] ) );
+			$tab = sanitize_key( wp_unslash( $_GET['tab'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only request routing, no state change.
 			if ( isset( $tabs[ $tab ] ) ) {
 				return $tab;
 			}

@@ -264,7 +264,7 @@ class AuditLogModule implements ModuleInterface {
 		// Read filter + pagination from the query (read-only, no nonce needed).
 		$filter = '';
 		if ( isset( $_GET['event_type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$candidate = sanitize_key( wp_unslash( $_GET['event_type'] ) );
+			$candidate = sanitize_key( wp_unslash( $_GET['event_type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only request routing, no state change.
 			if ( isset( $labels[ $candidate ] ) ) {
 				$filter = $candidate;
 			}
