@@ -4,6 +4,7 @@
 /.gitignore
 /.distignore
 /.wordpress-org
+/docs
 /dist
 README.md
 /node_modules
