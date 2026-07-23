@@ -336,20 +336,18 @@ class HideLoginModule implements ModuleInterface {
 	 * @return void
 	 */
 	public function wpmu_options() {
-		$out = '';
-
-		$out .= '<h3>' . esc_html__( 'Datametric Login Shield', 'datametric-login-shield' ) . '</h3>';
-		$out .= '<p>' . esc_html__( 'This option allows you to set a networkwide default, which can be overridden by individual sites.', 'datametric-login-shield' ) . '</p>';
-		$out .= '<table class="form-table">';
-		$out .= '<tr valign="top">';
-		$out .= '<th scope="row"><label for="whl_page">' . esc_html__( 'Networkwide default', 'datametric-login-shield' ) . '</label></th>';
-		$out .= '<td><input id="whl_page" type="text" name="whl_page" value="' . esc_attr( get_site_option( 'whl_page', 'login' ) ) . '"></td>';
-		$out .= '<th scope="row"><label for="whl_redirect_admin">' . esc_html__( 'Redirection url default', 'datametric-login-shield' ) . '</label></th>';
-		$out .= '<td><input id="whl_redirect_admin" type="text" name="whl_redirect_admin" value="' . esc_attr( get_site_option( 'whl_redirect_admin', '404' ) ) . '"></td>';
-		$out .= '</tr>';
-		$out .= '</table>';
-
-		echo $out; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped parts above.
+		?>
+		<h3><?php esc_html_e( 'Datametric Login Shield', 'datametric-login-shield' ); ?></h3>
+		<p><?php esc_html_e( 'This option allows you to set a networkwide default, which can be overridden by individual sites.', 'datametric-login-shield' ); ?></p>
+		<table class="form-table">
+			<tr valign="top">
+				<th scope="row"><label for="whl_page"><?php esc_html_e( 'Networkwide default', 'datametric-login-shield' ); ?></label></th>
+				<td><input id="whl_page" type="text" name="whl_page" value="<?php echo esc_attr( get_site_option( 'whl_page', 'login' ) ); ?>"></td>
+				<th scope="row"><label for="whl_redirect_admin"><?php esc_html_e( 'Redirection url default', 'datametric-login-shield' ); ?></label></th>
+				<td><input id="whl_redirect_admin" type="text" name="whl_redirect_admin" value="<?php echo esc_attr( get_site_option( 'whl_redirect_admin', '404' ) ); ?>"></td>
+			</tr>
+		</table>
+		<?php
 	}
 
 	/**
