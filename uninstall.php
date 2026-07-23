@@ -36,8 +36,8 @@ function dmls_uninstall_current_site() {
 	// Table names are built from the trusted $wpdb->prefix, not user input.
 	$attempts = $wpdb->prefix . 'dmls_login_attempts';
 	$events   = $wpdb->prefix . 'dmls_events';
-	$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $attempts ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.SchemaChange -- custom table teardown on uninstall.
-	$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $events ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.SchemaChange -- custom table teardown on uninstall.
+	$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $attempts ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- custom table teardown on uninstall.
+	$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $events ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- custom table teardown on uninstall.
 
 	// Remove stored two-factor data for all users.
 	foreach ( array( '_dmlsp_totp_secret', '_dmlsp_totp_enabled', '_dmlsp_totp_backup', '_dmlsp_totp_pending' ) as $meta_key ) {

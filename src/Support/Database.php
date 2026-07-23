@@ -130,8 +130,8 @@ class Database {
 
 		// Table identifiers cannot be parameterized; names are built from the
 		// trusted $wpdb->prefix, not user input.
-		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $attempts ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.SchemaChange -- custom table teardown on uninstall.
-		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $events ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.SchemaChange -- custom table teardown on uninstall.
+		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $attempts ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- custom table teardown on uninstall.
+		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $events ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- custom table teardown on uninstall.
 
 		delete_option( self::VERSION_OPTION );
 	}
