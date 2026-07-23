@@ -58,7 +58,9 @@ class HardeningModule implements ModuleInterface {
 		}
 
 		if ( Options::get( 'harden_author_enum', true ) ) {
-			add_action( 'template_redirect', array( $this, 'block_author_enumeration' ) );
+			// Priority 0: run before core's redirect_canonical (10), which would
+			// otherwise 301 ?author=N to /author/{login}/ and leak the username.
+			add_action( 'template_redirect', array( $this, 'block_author_enumeration' ), 0 );
 		}
 
 		if ( Options::get( 'harden_login_errors', true ) ) {
