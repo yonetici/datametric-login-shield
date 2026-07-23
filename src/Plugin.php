@@ -19,6 +19,11 @@ use Datametric\LoginShield\Modules\HideLogin\HideLoginModule;
 use Datametric\LoginShield\Modules\BruteForce\BruteForceModule;
 use Datametric\LoginShield\Modules\Hardening\HardeningModule;
 use Datametric\LoginShield\Modules\AuditLog\AuditLogModule;
+use Datametric\LoginShield\Modules\AuditExtras\AuditExtrasModule;
+use Datametric\LoginShield\Modules\Totp\TotpModule;
+use Datametric\LoginShield\Modules\Ip\IpAccessModule;
+use Datametric\LoginShield\Modules\Captcha\CaptchaModule;
+use Datametric\LoginShield\Modules\Branding\BrandingModule;
 use Datametric\LoginShield\Admin\SettingsPage;
 
 /**
@@ -120,6 +125,11 @@ class Plugin {
 			new BruteForceModule(),
 			new HardeningModule(),
 			new AuditLogModule(),
+			new AuditExtrasModule(),
+			new TotpModule(),
+			new IpAccessModule(),
+			new CaptchaModule(),
+			new BrandingModule(),
 		);
 	}
 

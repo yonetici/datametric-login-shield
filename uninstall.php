@@ -39,6 +39,11 @@ function dmls_uninstall_current_site() {
 	$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $attempts ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.SchemaChange -- custom table teardown on uninstall.
 	$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $events ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.SchemaChange -- custom table teardown on uninstall.
 
+	// Remove stored two-factor data for all users.
+	foreach ( array( '_dmlsp_totp_secret', '_dmlsp_totp_enabled', '_dmlsp_totp_backup', '_dmlsp_totp_pending' ) as $meta_key ) {
+		delete_metadata( 'user', 0, $meta_key, '', true );
+	}
+
 	flush_rewrite_rules();
 }
 

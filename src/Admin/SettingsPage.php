@@ -620,22 +620,21 @@ class SettingsPage {
 	}
 
 	/**
-	 * Show the "coming soon" roadmap of Pro/Phase-2 modules (review-friendly,
-	 * shown only inside our own page, no nagging elsewhere).
+	 * Show the set of included security features (all free), each linking to its tab.
 	 *
 	 * @return void
 	 */
 	private function render_roadmap() {
 		$items = array(
-			__( 'Two-factor authentication (email code)', 'datametric-login-shield' ),
-			__( 'Two-factor with authenticator apps (Pro)', 'datametric-login-shield' ),
-			__( 'IP allow / deny lists (Pro)', 'datametric-login-shield' ),
-			__( 'CAPTCHA on login (Pro)', 'datametric-login-shield' ),
-			__( 'Custom login page branding (Pro)', 'datametric-login-shield' ),
+			__( 'Two-factor authentication (authenticator apps)', 'datametric-login-shield' ),
+			__( 'IP allow / deny lists', 'datametric-login-shield' ),
+			__( 'CAPTCHA on login', 'datametric-login-shield' ),
+			__( 'Custom login page branding', 'datametric-login-shield' ),
+			__( 'Audit alerts & CSV export', 'datametric-login-shield' ),
 		);
 		?>
 		<div class="dls-card dls-roadmap">
-			<span class="dls-card__label"><?php esc_html_e( 'Coming next', 'datametric-login-shield' ); ?></span>
+			<span class="dls-card__label"><?php esc_html_e( 'Included — set up in the tabs above', 'datametric-login-shield' ); ?></span>
 			<ul class="dls-roadmap__list">
 				<?php foreach ( $items as $item ) : ?>
 					<li><?php echo esc_html( $item ); ?></li>
