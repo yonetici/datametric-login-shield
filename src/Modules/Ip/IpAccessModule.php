@@ -88,7 +88,7 @@ class IpAccessModule implements ModuleInterface {
 				'label'       => __( 'Deny list', 'datametric-login-shield' ),
 				'description' => __( 'One IP or CIDR range per line. These are always blocked from logging in.', 'datametric-login-shield' ),
 				'default'     => '',
-				'placeholder' => "192.0.2.44",
+				'placeholder' => '192.0.2.44',
 			)
 		);
 	}

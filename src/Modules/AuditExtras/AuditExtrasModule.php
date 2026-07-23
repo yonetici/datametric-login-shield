@@ -127,9 +127,7 @@ class AuditExtrasModule implements ModuleInterface {
 		return (int) Options::get( 'pro_audit_retention', 30 );
 	}
 
-	/* --------------------------------------------------------------------- *
-	 * Alerts
-	 * --------------------------------------------------------------------- */
+	// Alerts.
 
 	/**
 	 * Send an email alert for notable events.
@@ -184,9 +182,7 @@ class AuditExtrasModule implements ModuleInterface {
 		wp_mail( $to, $subject, $body );
 	}
 
-	/* --------------------------------------------------------------------- *
-	 * Admin tab + CSV export
-	 * --------------------------------------------------------------------- */
+	// Admin tab + CSV export.
 
 	/**
 	 * Render the Alerts & Export tab: settings form + export button.
@@ -229,11 +225,13 @@ class AuditExtrasModule implements ModuleInterface {
 		header( 'Content-Type: text/csv; charset=utf-8' );
 		header( 'Content-Disposition: attachment; filename=login-audit-' . gmdate( 'Ymd-His' ) . '.csv' );
 
-		$out = fopen( 'php://output', 'w' );
-		fputcsv( $out, array( 'created_at_utc', 'event', 'username', 'user_id', 'ip' ) );
+		// php://output is the HTTP response stream, not a filesystem file, so
+		// WP_Filesystem does not apply; fputcsv() gives correct RFC-4180 quoting.
+		$out = fopen( 'php://output', 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- streaming CSV download, not a file write.
+		fputcsv( $out, array( 'created_at_utc', 'event', 'username', 'user_id', 'ip' ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- streaming CSV download.
 		if ( is_array( $rows ) ) {
 			foreach ( $rows as $row ) {
-				fputcsv(
+				fputcsv( // phpcs:ignore WordPress.WP.AlternativeFunctions -- streaming CSV download.
 					$out,
 					array(
 						$this->csv_safe( $row->created_at ),
@@ -245,7 +243,7 @@ class AuditExtrasModule implements ModuleInterface {
 				);
 			}
 		}
-		fclose( $out );
+		fclose( $out ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- closing the output stream.
 		exit;
 	}
 

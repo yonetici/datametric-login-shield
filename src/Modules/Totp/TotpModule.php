@@ -86,9 +86,7 @@ class TotpModule implements ModuleInterface {
 		}
 	}
 
-	/* --------------------------------------------------------------------- *
-	 * Settings (role enforcement)
-	 * --------------------------------------------------------------------- */
+	// Settings (role enforcement).
 
 	/**
 	 * Register the Two-Factor settings tab (one "require" toggle per role).
@@ -131,9 +129,7 @@ class TotpModule implements ModuleInterface {
 		return $roles;
 	}
 
-	/* --------------------------------------------------------------------- *
-	 * Enrolment state
-	 * --------------------------------------------------------------------- */
+	// Enrolment state.
 
 	/**
 	 * Whether a user has an active second factor.
@@ -166,9 +162,7 @@ class TotpModule implements ModuleInterface {
 		return false;
 	}
 
-	/* --------------------------------------------------------------------- *
-	 * Login interstitial
-	 * --------------------------------------------------------------------- */
+	// Login interstitial.
 
 	/**
 	 * Require a second factor once the password has been verified.
@@ -265,7 +259,7 @@ class TotpModule implements ModuleInterface {
 			 * complete. This is the only time wp_login runs for a 2FA user, so
 			 * the audit log records exactly one login_success.
 			 */
-			do_action( 'wp_login', $user->user_login, $user );
+			do_action( 'wp_login', $user->user_login, $user ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- re-firing WordPress core hook after 2FA completes.
 		}
 
 		$redirect = ! empty( $data['redirect_to'] ) ? $data['redirect_to'] : admin_url();
@@ -273,9 +267,7 @@ class TotpModule implements ModuleInterface {
 		exit;
 	}
 
-	/* --------------------------------------------------------------------- *
-	 * Token store (single-use, server-side)
-	 * --------------------------------------------------------------------- */
+	// Token store (single-use, server-side).
 
 	/**
 	 * Create a login token.
@@ -340,9 +332,7 @@ class TotpModule implements ModuleInterface {
 		delete_transient( self::TOKEN_TRANSIENT . hash( 'sha256', $token ) );
 	}
 
-	/* --------------------------------------------------------------------- *
-	 * Backup codes
-	 * --------------------------------------------------------------------- */
+	// Backup codes.
 
 	/**
 	 * Generate a fresh set of backup codes, store their hashes, return plaintext.
@@ -391,9 +381,7 @@ class TotpModule implements ModuleInterface {
 		return false;
 	}
 
-	/* --------------------------------------------------------------------- *
-	 * Enforcement
-	 * --------------------------------------------------------------------- */
+	// Enforcement.
 
 	/**
 	 * Redirect required-but-unenrolled users to their profile to set up 2FA.
@@ -434,9 +422,7 @@ class TotpModule implements ModuleInterface {
 		exit;
 	}
 
-	/* --------------------------------------------------------------------- *
-	 * Profile UI
-	 * --------------------------------------------------------------------- */
+	// Profile UI.
 
 	/**
 	 * Render the 2FA section on the user profile screen.
@@ -531,9 +517,7 @@ class TotpModule implements ModuleInterface {
 		}
 	}
 
-	/* --------------------------------------------------------------------- *
-	 * Rendering
-	 * --------------------------------------------------------------------- */
+	// Rendering.
 
 	/**
 	 * Render the login interstitial (code entry) page and stop.
