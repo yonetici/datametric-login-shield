@@ -3,6 +3,7 @@
 /.github
 /.gitignore
 /.distignore
+/.wordpress-org
 /dist
 README.md
 /node_modules
