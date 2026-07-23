@@ -49,7 +49,27 @@ class AuditLogModule implements ModuleInterface {
 	 *
 	 * @return void
 	 */
-	public function register( Container $container ) {}
+	public function register( Container $container ) {
+		// Expose this module so others can record events directly.
+		$container->set( 'audit_log', $this );
+	}
+
+	/**
+	 * Record an event directly (public API for other modules).
+	 *
+	 * @param string $type     Event type (login_success|login_failed|lockout|logout).
+	 * @param string $username Username.
+	 * @param int    $user_id  User id.
+	 *
+	 * @return void
+	 */
+	public function record( $type, $username = '', $user_id = 0 ) {
+		if ( ! Options::get( 'audit_enabled', true ) ) {
+			return;
+		}
+
+		$this->insert_event( $type, (string) $username, (int) $user_id );
+	}
 
 	/**
 	 * {@inheritDoc}

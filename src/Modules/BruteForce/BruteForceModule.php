@@ -51,7 +51,11 @@ class BruteForceModule implements ModuleInterface {
 	 *
 	 * @return void
 	 */
-	public function register( Container $container ) {}
+	public function register( Container $container ) {
+		// Expose this module so other modules (e.g. two-factor) can record or
+		// clear attempts directly instead of firing WordPress core hooks.
+		$container->set( 'brute_force', $this );
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -207,6 +211,16 @@ class BruteForceModule implements ModuleInterface {
 	 * @return void
 	 */
 	public function clear_attempts( $user_login, $user = null ) {
+		$this->forget_ip();
+	}
+
+	/**
+	 * Delete the current client IP's recorded attempts. Public API for other
+	 * modules (e.g. two-factor after a verified second factor).
+	 *
+	 * @return void
+	 */
+	public function forget_ip() {
 		global $wpdb;
 
 		$ip = Ip::get();

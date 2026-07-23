@@ -44,10 +44,17 @@ class TotpModule implements ModuleInterface {
 	const MAX_ATTEMPTS    = 5;
 
 	/**
+	 * Shared service container (to reach the audit-log and brute-force modules).
+	 *
+	 * @var Container|null
+	 */
+	private $container;
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public function id() {
-		return 'pro-totp';
+		return 'two-factor';
 	}
 
 	/**
@@ -62,17 +69,23 @@ class TotpModule implements ModuleInterface {
 	 *
 	 * @param Container $container Shared container.
 	 */
-	public function register( Container $container ) {}
+	public function register( Container $container ) {
+		$this->container = $container;
+	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public function boot() {
-		// Gate the second step at authentication time (before wp_login fires),
-		// so the audit log and any login hooks only run once 2FA is verified.
-		// Priority 40 runs after core auth (20) and the brute-force lockout (30).
-		add_filter( 'authenticate', array( $this, 'gate_2fa' ), 40, 3 );
+		// Interactive logins: start the second step on wp_login at an early
+		// priority (1) so it runs before other wp_login listeners — the audit
+		// log and brute-force reset only happen once the code is verified.
+		add_action( 'wp_login', array( $this, 'start_2fa' ), 1, 2 );
 		add_action( 'login_form_dmlsp_2fa', array( $this, 'handle_2fa_submit' ) );
+
+		// Non-interactive channels (XML-RPC, REST, WP-CLI) cannot show a form,
+		// so a 2FA user is blocked there via the authenticate filter.
+		add_filter( 'authenticate', array( $this, 'block_non_interactive' ), 40, 3 );
 
 		// Application passwords bypass the interactive login (and thus 2FA), so
 		// disable them for users who have a second factor enabled.
@@ -190,14 +203,13 @@ class TotpModule implements ModuleInterface {
 	// Login interstitial.
 
 	/**
-	 * Require a second factor once the password has been verified.
+	 * Block 2FA users on non-interactive channels that cannot show a form.
 	 *
-	 * Runs on the `authenticate` filter (priority 40, after core auth and the brute-force lockout check).
-	 * For an interactive login it renders the code step and exits, so the auth
-	 * cookie is never set and `wp_login` never fires until the code is verified
-	 * in handle_2fa_submit(). Non-interactive contexts (XML-RPC, REST,
-	 * application passwords, WP-CLI) cannot show a form, so they are blocked
-	 * outright — this also closes the 2FA-bypass those channels would allow.
+	 * WordPress fires the `authenticate` filter for XML-RPC and WP-CLI logins
+	 * (and REST when a password grant is used); those channels cannot present a
+	 * second-factor prompt, so a 2FA-enabled user is rejected there. Interactive
+	 * browser logins are handled on `wp_login` by start_2fa(). Returns the input
+	 * untouched in every other case (including a failed password).
 	 *
 	 * @param mixed  $user     Auth result so far.
 	 * @param string $username Submitted username.
@@ -205,22 +217,50 @@ class TotpModule implements ModuleInterface {
 	 *
 	 * @return mixed
 	 */
-	public function gate_2fa( $user, $username, $password ) {
+	public function block_non_interactive( $user, $username, $password ) {
 		if ( defined( 'DMLS_DISABLE_2FA' ) && DMLS_DISABLE_2FA ) {
 			return $user;
 		}
 
-		// Only act once the password already validated to a real user.
 		if ( ! ( $user instanceof WP_User ) || ! $this->user_active( $user ) ) {
 			return $user;
 		}
 
-		// No interactive form is possible on these channels — block instead.
 		if ( ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST )
 			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
 			|| ( defined( 'WP_CLI' ) && WP_CLI ) ) {
-			return new WP_Error( 'dmlsp_2fa_required', __( 'Two-factor authentication is required. Please sign in through the website.', 'datametric-login-shield' ) );
+			return new WP_Error( 'dmls_2fa_required', __( 'Two-factor authentication is required. Please sign in through the website.', 'datametric-login-shield' ) );
 		}
+
+		return $user;
+	}
+
+	/**
+	 * Start the second step for an interactive login.
+	 *
+	 * Hooked to `wp_login` at priority 1. WordPress has just issued the auth
+	 * cookie; we immediately drop it and show the code prompt, so no session is
+	 * usable until the second factor is verified in handle_2fa_submit(). Running
+	 * before the audit-log and brute-force listeners (priority 10) means neither
+	 * records a completed login until the code passes.
+	 *
+	 * @param string  $user_login Username.
+	 * @param WP_User $user       Authenticated user.
+	 *
+	 * @return void
+	 */
+	public function start_2fa( $user_login, $user ) {
+		if ( defined( 'DMLS_DISABLE_2FA' ) && DMLS_DISABLE_2FA ) {
+			return;
+		}
+
+		if ( ! ( $user instanceof WP_User ) || ! $this->user_active( $user ) ) {
+			return;
+		}
+
+		// Undo the login WordPress just performed until the code is verified.
+		wp_clear_auth_cookie();
+		wp_set_current_user( 0 );
 
 		$remember    = ! empty( $_POST['rememberme'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- WP core login form field.
 		$redirect_to = isset( $_REQUEST['redirect_to'] ) ? esc_url_raw( wp_unslash( $_REQUEST['redirect_to'] ) ) : admin_url(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- core login param.
@@ -229,6 +269,24 @@ class TotpModule implements ModuleInterface {
 
 		$this->render_interstitial( $token, '' );
 		exit;
+	}
+
+	/**
+	 * The audit-log module, if available.
+	 *
+	 * @return \Datametric\LoginShield\Modules\AuditLog\AuditLogModule|null
+	 */
+	private function audit() {
+		return ( $this->container && $this->container->has( 'audit_log' ) ) ? $this->container->get( 'audit_log' ) : null;
+	}
+
+	/**
+	 * The brute-force module, if available.
+	 *
+	 * @return \Datametric\LoginShield\Modules\BruteForce\BruteForceModule|null
+	 */
+	private function brute_force() {
+		return ( $this->container && $this->container->has( 'brute_force' ) ) ? $this->container->get( 'brute_force' ) : null;
 	}
 
 	/**
@@ -267,14 +325,18 @@ class TotpModule implements ModuleInterface {
 		if ( ! $ok ) {
 			$data['attempts']++;
 			$this->put_token( $token, $data );
-			// Fire the standard failed-login hook so the audit log records it and
-			// the brute-force module counts it (throttling 2FA-code guessing).
+
+			// Record and throttle the failed second factor by calling our own
+			// modules directly (no core hooks fired from the plugin).
 			$failed_user = get_userdata( $data['user_id'] );
-			do_action(
-				'wp_login_failed', // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- firing the WordPress core hook so the audit log and brute-force module see the failed 2FA.
-				$failed_user ? $failed_user->user_login : '',
-				new WP_Error( 'dmlsp_2fa', __( 'Invalid two-factor code.', 'datametric-login-shield' ) )
-			);
+			$login       = $failed_user ? $failed_user->user_login : '';
+			if ( $this->brute_force() ) {
+				$this->brute_force()->record_failure( $login );
+			}
+			if ( $this->audit() ) {
+				$this->audit()->record( 'login_failed', $login, 0 );
+			}
+
 			$this->render_interstitial( $token, __( 'Invalid code. Please try again.', 'datametric-login-shield' ) );
 			exit;
 		}
@@ -285,12 +347,24 @@ class TotpModule implements ModuleInterface {
 		$user = get_userdata( $data['user_id'] );
 		if ( $user ) {
 			wp_set_current_user( $user->ID );
+
+			// Notify our own modules that the login is now complete (the initial
+			// wp_login listeners were skipped because start_2fa exited first).
+			if ( $this->audit() ) {
+				$this->audit()->record( 'login_success', $user->user_login, $user->ID );
+			}
+			if ( $this->brute_force() ) {
+				$this->brute_force()->forget_ip();
+			}
+
 			/**
-			 * Fire the standard login hook now that authentication is fully
-			 * complete. This is the only time wp_login runs for a 2FA user, so
-			 * the audit log records exactly one login_success.
+			 * Fires after a user completes two-factor authentication. Prefixed
+			 * add-on hook for integrations (the core wp_login already fired for
+			 * the password step and is not re-fired here).
+			 *
+			 * @param \WP_User $user The now fully-authenticated user.
 			 */
-			do_action( 'wp_login', $user->user_login, $user ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- re-firing WordPress core hook after 2FA completes.
+			do_action( 'dmls_login', $user );
 		}
 
 		$redirect = ! empty( $data['redirect_to'] ) ? $data['redirect_to'] : admin_url();
