@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Datametric Login Shield 1.0.0\n"
-"Report-Msgid-Bugs-To: https://www.datametric.com.tr/login-shield\n"
+"Report-Msgid-Bugs-To: https://github.com/yonetici/datametric-login-shield/issues\n"
 "Last-Translator: Datametric\n"
 "Language-Team: Datametric\n"
 "MIME-Version: 1.0\n"

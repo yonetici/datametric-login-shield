@@ -8,18 +8,19 @@
     "custom login url",
     "security"
   ],
-  "homepage": "https://www.datametric.com.tr/login-shield",
+  "homepage": "https://github.com/yonetici/datametric-login-shield",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
   "authors": [
     {
       "name": "Datametric",
-      "homepage": "https://www.datametric.com.tr",
+      "homepage": "https://www.datametric.rs/",
       "role": "Developer"
     }
   ],
   "support": {
-    "source": "https://www.datametric.com.tr/login-shield"
+    "source": "https://github.com/yonetici/datametric-login-shield",
+    "issues": "https://github.com/yonetici/datametric-login-shield/issues"
   },
   "require": {
     "php": ">=7.2"

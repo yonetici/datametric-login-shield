@@ -18,7 +18,7 @@
 
 <p align="center">
   📖 <a href="https://www.ridvanbilgin.com/2026/07/how-to-hide-your-wordpress-login-url.html">Read the full guide</a>
-  &nbsp;·&nbsp; 🌐 <a href="https://www.datametric.com.tr">Datametric</a>
+  &nbsp;·&nbsp; 🌐 <a href="https://www.datametric.rs/">Datametric</a>
   &nbsp;·&nbsp; 🐛 <a href="https://github.com/yonetici/datametric-login-shield/issues">Report an issue</a>
 </p>
 
