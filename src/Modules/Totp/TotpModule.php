@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use WP_User;
+use WP_Error;
 use Datametric\LoginShield\Container;
 use Datametric\LoginShield\Contracts\ModuleInterface;
 use Datametric\LoginShield\Admin\Settings;
@@ -69,8 +70,13 @@ class TotpModule implements ModuleInterface {
 	public function boot() {
 		// Gate the second step at authentication time (before wp_login fires),
 		// so the audit log and any login hooks only run once 2FA is verified.
-		add_filter( 'authenticate', array( $this, 'gate_2fa' ), 30, 3 );
+		// Priority 40 runs after core auth (20) and the brute-force lockout (30).
+		add_filter( 'authenticate', array( $this, 'gate_2fa' ), 40, 3 );
 		add_action( 'login_form_dmlsp_2fa', array( $this, 'handle_2fa_submit' ) );
+
+		// Application passwords bypass the interactive login (and thus 2FA), so
+		// disable them for users who have a second factor enabled.
+		add_filter( 'wp_is_application_passwords_available_for_user', array( $this, 'block_app_passwords' ), 10, 2 );
 
 		// Per-user enrolment on the profile screen.
 		add_action( 'show_user_profile', array( $this, 'render_profile_section' ) );
@@ -162,12 +168,31 @@ class TotpModule implements ModuleInterface {
 		return false;
 	}
 
+	/**
+	 * Disable application passwords for users who have 2FA enabled.
+	 *
+	 * Application passwords authenticate REST/XML-RPC requests without the
+	 * interactive login, which would bypass the second factor.
+	 *
+	 * @param bool    $available Whether app passwords are available.
+	 * @param WP_User $user      The user.
+	 *
+	 * @return bool
+	 */
+	public function block_app_passwords( $available, $user ) {
+		if ( $user instanceof WP_User && $this->user_active( $user ) ) {
+			return false;
+		}
+
+		return $available;
+	}
+
 	// Login interstitial.
 
 	/**
 	 * Require a second factor once the password has been verified.
 	 *
-	 * Runs on the `authenticate` filter (priority 30, after core password auth).
+	 * Runs on the `authenticate` filter (priority 40, after core auth and the brute-force lockout check).
 	 * For an interactive login it renders the code step and exits, so the auth
 	 * cookie is never set and `wp_login` never fires until the code is verified
 	 * in handle_2fa_submit(). Non-interactive contexts (XML-RPC, REST,
@@ -242,8 +267,14 @@ class TotpModule implements ModuleInterface {
 		if ( ! $ok ) {
 			$data['attempts']++;
 			$this->put_token( $token, $data );
-			/** Reuse the free plugin's audit log for the failed second factor. */
-			do_action( 'dmls_event_logged', 'login_failed', '', get_userdata( $data['user_id'] ) ? get_userdata( $data['user_id'] )->user_login : '', (int) $data['user_id'] );
+			// Fire the standard failed-login hook so the audit log records it and
+			// the brute-force module counts it (throttling 2FA-code guessing).
+			$failed_user = get_userdata( $data['user_id'] );
+			do_action(
+				'wp_login_failed',
+				$failed_user ? $failed_user->user_login : '',
+				new WP_Error( 'dmlsp_2fa', __( 'Invalid two-factor code.', 'datametric-login-shield' ) )
+			);
 			$this->render_interstitial( $token, __( 'Invalid code. Please try again.', 'datametric-login-shield' ) );
 			exit;
 		}
@@ -508,6 +539,18 @@ class TotpModule implements ModuleInterface {
 			delete_user_meta( $user_id, self::META_PENDING );
 			$codes = $this->generate_backup_codes( $user_id );
 			set_transient( 'dmlsp_backup_show_' . $user_id, $codes, 120 );
+
+			// Revoke any application passwords and invalidate other sessions so
+			// nothing keeps 2FA-free access to this account.
+			if ( class_exists( '\WP_Application_Passwords' ) ) {
+				\WP_Application_Passwords::delete_all_application_passwords( $user_id );
+			}
+			if ( get_current_user_id() === (int) $user_id ) {
+				wp_destroy_other_sessions();
+			} else {
+				\WP_Session_Tokens::get_instance( $user_id )->destroy_all();
+			}
+
 			add_action(
 				'user_profile_update_errors',
 				function ( $errors ) {
@@ -530,8 +573,18 @@ class TotpModule implements ModuleInterface {
 	 */
 	private function render_interstitial( $token, $message = '', $dead = false ) {
 		$action = add_query_arg( 'action', 'dmlsp_2fa', site_url( 'wp-login.php', 'login_post' ) );
+		$title  = __( 'Two-Factor Authentication', 'datametric-login-shield' );
 
-		login_header( __( 'Two-Factor Authentication', 'datametric-login-shield' ), '' );
+		// login_header()/login_footer() exist only when wp-login.php is loaded.
+		// On front-end login forms (e.g. WooCommerce) they are undefined, so we
+		// fall back to a self-contained page instead of fataling.
+		$has_login_ui = function_exists( 'login_header' ) && function_exists( 'login_footer' );
+
+		if ( $has_login_ui ) {
+			login_header( $title, '' );
+		} else {
+			$this->minimal_header( $title );
+		}
 
 		if ( '' !== $message ) {
 			echo '<div id="login_error">' . esc_html( $message ) . '</div>';
@@ -539,19 +592,64 @@ class TotpModule implements ModuleInterface {
 
 		if ( $dead ) {
 			echo '<p><a href="' . esc_url( wp_login_url() ) . '">' . esc_html__( 'Back to sign in', 'datametric-login-shield' ) . '</a></p>';
-			login_footer();
-			return;
+		} else {
+			echo '<form name="dmlsp_2fa" method="post" action="' . esc_url( $action ) . '">';
+			echo '<p><label for="dmlsp_code">' . esc_html__( 'Authentication code', 'datametric-login-shield' ) . '<br />';
+			echo '<input type="text" name="dmlsp_code" id="dmlsp_code" class="input" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" autofocus /></label></p>';
+			echo '<input type="hidden" name="dmlsp_token" value="' . esc_attr( $token ) . '" />';
+			wp_nonce_field( 'dmlsp_2fa' );
+			echo '<p class="submit"><input type="submit" class="button button-primary button-large" value="' . esc_attr__( 'Verify', 'datametric-login-shield' ) . '" /></p>';
+			echo '<p class="description">' . esc_html__( 'Lost your device? Enter one of your backup codes instead.', 'datametric-login-shield' ) . '</p>';
+			echo '</form>';
 		}
 
-		echo '<form name="dmlsp_2fa" method="post" action="' . esc_url( $action ) . '">';
-		echo '<p><label for="dmlsp_code">' . esc_html__( 'Authentication code', 'datametric-login-shield' ) . '<br />';
-		echo '<input type="text" name="dmlsp_code" id="dmlsp_code" class="input" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" autofocus /></label></p>';
-		echo '<input type="hidden" name="dmlsp_token" value="' . esc_attr( $token ) . '" />';
-		wp_nonce_field( 'dmlsp_2fa' );
-		echo '<p class="submit"><input type="submit" class="button button-primary button-large" value="' . esc_attr__( 'Verify', 'datametric-login-shield' ) . '" /></p>';
-		echo '<p class="description">' . esc_html__( 'Lost your device? Enter one of your backup codes instead.', 'datametric-login-shield' ) . '</p>';
-		echo '</form>';
+		if ( $has_login_ui ) {
+			login_footer( $dead ? '' : 'dmlsp_code' );
+		} else {
+			$this->minimal_footer();
+		}
+	}
 
-		login_footer( 'dmlsp_code' );
+	/**
+	 * Minimal self-contained page header (used when wp-login.php UI is absent).
+	 *
+	 * @param string $title Page title.
+	 *
+	 * @return void
+	 */
+	private function minimal_header( $title ) {
+		nocache_headers();
+		if ( ! headers_sent() ) {
+			header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset', 'UTF-8' ) );
+		}
+		?>
+<!DOCTYPE html>
+<html <?php language_attributes(); ?>>
+<head>
+<meta charset="<?php bloginfo( 'charset' ); ?>" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title><?php echo esc_html( $title ); ?></title>
+<style>
+body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:#f0f0f1;margin:0;padding:10vh 16px}
+#dmlsp-box{max-width:320px;margin:0 auto;background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:24px}
+#dmlsp-box h1{font-size:18px;color:#1e2a4a;margin:0 0 16px}
+#dmlsp-box input[type=text]{width:100%;padding:9px;box-sizing:border-box;font-size:20px;letter-spacing:3px;text-align:center}
+#dmlsp-box .button-primary{margin-top:14px;padding:9px 18px;background:#1e2a4a;color:#fff;border:0;border-radius:6px;cursor:pointer;font-size:14px}
+#login_error{color:#b32d2e;margin-bottom:12px}
+.description{color:#666;font-size:12px;margin-top:14px}
+label{color:#1e2a4a;font-size:13px}
+</style>
+</head>
+<body><div id="dmlsp-box"><h1><?php echo esc_html( $title ); ?></h1>
+		<?php
+	}
+
+	/**
+	 * Minimal self-contained page footer.
+	 *
+	 * @return void
+	 */
+	private function minimal_footer() {
+		echo '</div></body></html>';
 	}
 }
