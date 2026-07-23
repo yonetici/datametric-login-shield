@@ -43,9 +43,43 @@
 	font-size: 13px;
 }
 
-/* Tabs */
-.dls-tabs {
+/* Tabs — wrap cleanly when there are many */
+.dls-tabs.nav-tab-wrapper {
 	margin-top: 12px;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 2px;
+	padding-bottom: 0;
+	border-bottom: 1px solid #c3c4c7;
+}
+
+.dls-tabs.nav-tab-wrapper .nav-tab {
+	float: none;
+	margin: 0;
+	border-bottom-color: transparent;
+}
+
+.dls-tabs.nav-tab-wrapper .nav-tab-active {
+	border-bottom-color: #f0f0f1;
+}
+
+/* Help box (e.g. CAPTCHA key instructions) */
+.dls-help {
+	background: #f6f7f7;
+	border: 1px solid var(--dls-line);
+	border-left: 4px solid var(--dls-teal);
+	border-radius: 8px;
+	padding: 12px 16px;
+	margin: 16px 0;
+	max-width: 720px;
+}
+
+.dls-help ol {
+	margin: 8px 0 4px 18px;
+}
+
+.dls-help li {
+	margin-bottom: 8px;
 }
 
 /* Body */

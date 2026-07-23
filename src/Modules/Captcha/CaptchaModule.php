@@ -112,7 +112,7 @@ class CaptchaModule implements ModuleInterface {
 	 * @return void
 	 */
 	private function register_settings() {
-		Settings::add_tab( 'captcha', __( 'CAPTCHA', 'datametric-login-shield' ), 27 );
+		Settings::add_tab( 'captcha', __( 'CAPTCHA', 'datametric-login-shield' ), 27, array( $this, 'render_tab' ) );
 
 		Settings::add_field(
 			'captcha',
@@ -149,6 +149,47 @@ class CaptchaModule implements ModuleInterface {
 				'description' => __( 'When a provider is selected, its script loads on the login page and responses are verified with that provider.', 'datametric-login-shield' ),
 			)
 		);
+	}
+
+	/**
+	 * Render the CAPTCHA tab: a "where to get your keys" help box + the form.
+	 *
+	 * @return void
+	 */
+	public function render_tab() {
+		?>
+		<div class="dls-help">
+			<p><strong><?php esc_html_e( 'Where to get your Site key and Secret key', 'datametric-login-shield' ); ?></strong></p>
+			<ol>
+				<li>
+					<strong>Google reCAPTCHA (v2 / v3):</strong>
+					<a href="https://www.google.com/recaptcha/admin/create" target="_blank" rel="noopener">google.com/recaptcha/admin</a>
+					— <?php esc_html_e( 'sign in, register your domain, choose "reCAPTCHA v2 (checkbox)" or "reCAPTCHA v3", then copy the Site key and Secret key.', 'datametric-login-shield' ); ?>
+				</li>
+				<li>
+					<strong>hCaptcha:</strong>
+					<a href="https://dashboard.hcaptcha.com/sites" target="_blank" rel="noopener">dashboard.hcaptcha.com/sites</a>
+					— <?php esc_html_e( 'create a free account, add a site (New Site), then copy the Site key; find the Secret key under Settings.', 'datametric-login-shield' ); ?>
+				</li>
+				<li>
+					<strong>Cloudflare Turnstile:</strong>
+					<a href="https://dash.cloudflare.com/?to=/:account/turnstile" target="_blank" rel="noopener">dash.cloudflare.com → Turnstile</a>
+					— <?php esc_html_e( 'add a site (Add Site), enter your domain, then copy the Site Key and Secret Key.', 'datametric-login-shield' ); ?>
+				</li>
+			</ol>
+			<p class="description"><?php esc_html_e( 'Add your site domain when registering. For localhost testing, most providers require you to also add "localhost" or "127.0.0.1" (Turnstile accepts localhost by default).', 'datametric-login-shield' ); ?></p>
+		</div>
+
+		<form method="post" class="dls-form">
+			<?php wp_nonce_field( 'dmls_save_settings', 'dmls_nonce' ); ?>
+			<input type="hidden" name="dmls_action" value="save_fields" />
+			<input type="hidden" name="dmls_tab" value="captcha" />
+			<?php
+			Settings::render_fields( 'captcha' );
+			submit_button();
+			?>
+		</form>
+		<?php
 	}
 
 	/**
