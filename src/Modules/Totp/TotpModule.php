@@ -271,7 +271,7 @@ class TotpModule implements ModuleInterface {
 			// the brute-force module counts it (throttling 2FA-code guessing).
 			$failed_user = get_userdata( $data['user_id'] );
 			do_action(
-				'wp_login_failed',
+				'wp_login_failed', // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- firing the WordPress core hook so the audit log and brute-force module see the failed 2FA.
 				$failed_user ? $failed_user->user_login : '',
 				new WP_Error( 'dmlsp_2fa', __( 'Invalid two-factor code.', 'datametric-login-shield' ) )
 			);
