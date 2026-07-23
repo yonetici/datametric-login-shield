@@ -51,6 +51,14 @@ class TotpModule implements ModuleInterface {
 	private $container;
 
 	/**
+	 * Session token WordPress issued during wp_signon for a 2FA user, captured
+	 * so start_2fa() can destroy it server-side before the second factor.
+	 *
+	 * @var string
+	 */
+	private $pending_session_token = '';
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public function id() {
@@ -82,6 +90,10 @@ class TotpModule implements ModuleInterface {
 		// log and brute-force reset only happen once the code is verified.
 		add_action( 'wp_login', array( $this, 'start_2fa' ), 1, 2 );
 		add_action( 'login_form_dmlsp_2fa', array( $this, 'handle_2fa_submit' ) );
+
+		// Capture the session token WordPress issues for a 2FA user during
+		// wp_signon, so start_2fa() can invalidate it server-side.
+		add_action( 'set_auth_cookie', array( $this, 'capture_session_token' ), 10, 6 );
 
 		// Non-interactive channels (XML-RPC, REST, WP-CLI) cannot show a form,
 		// so a 2FA user is blocked there via the authenticate filter.
@@ -193,7 +205,7 @@ class TotpModule implements ModuleInterface {
 	 * @return bool
 	 */
 	public function block_app_passwords( $available, $user ) {
-		if ( $user instanceof WP_User && $this->user_active( $user ) ) {
+		if ( $user instanceof WP_User && ( $this->user_active( $user ) || $this->user_required( $user ) ) ) {
 			return false;
 		}
 
@@ -222,7 +234,14 @@ class TotpModule implements ModuleInterface {
 			return $user;
 		}
 
-		if ( ! ( $user instanceof WP_User ) || ! $this->user_active( $user ) ) {
+		if ( ! ( $user instanceof WP_User ) ) {
+			return $user;
+		}
+
+		// Block users who have 2FA enabled OR whose role requires it (even if not
+		// yet enrolled) — otherwise a required user could use these channels to
+		// skip enrolment entirely.
+		if ( ! $this->user_active( $user ) && ! $this->user_required( $user ) ) {
 			return $user;
 		}
 
@@ -233,6 +252,24 @@ class TotpModule implements ModuleInterface {
 		}
 
 		return $user;
+	}
+
+	/**
+	 * Capture the session token for a 2FA user as WordPress sets the auth cookie.
+	 *
+	 * @param string $auth_cookie Auth cookie value.
+	 * @param int    $expire      Cookie expiry.
+	 * @param int    $expiration  Session expiration.
+	 * @param int    $user_id     User id.
+	 * @param string $scheme      Cookie scheme.
+	 * @param string $token       Session token.
+	 *
+	 * @return void
+	 */
+	public function capture_session_token( $auth_cookie, $expire, $expiration, $user_id, $scheme, $token ) {
+		if ( $this->user_active( $user_id ) ) {
+			$this->pending_session_token = (string) $token;
+		}
 	}
 
 	/**
@@ -259,6 +296,13 @@ class TotpModule implements ModuleInterface {
 		}
 
 		// Undo the login WordPress just performed until the code is verified.
+		// Destroying the session token (server-side) is authoritative: even if
+		// the Set-Cookie clear header is lost because output already started,
+		// the cookie WordPress just issued becomes invalid on the next request.
+		if ( '' !== $this->pending_session_token ) {
+			\WP_Session_Tokens::get_instance( $user->ID )->destroy( $this->pending_session_token );
+			$this->pending_session_token = '';
+		}
 		wp_clear_auth_cookie();
 		wp_set_current_user( 0 );
 
