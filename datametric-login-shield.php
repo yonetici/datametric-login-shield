@@ -3,7 +3,7 @@
  * Plugin Name:       Datametric Login Shield
  * Plugin URI:        https://www.datametric.com.tr/login-shield
  * Description:        Hide your WordPress login URL and block access to wp-login.php and the wp-admin directory for logged-out visitors. Modular login-security layer by Datametric.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Author:            Datametric
  * Author URI:        https://www.datametric.com.tr
  * Requires at least: 6.2
@@ -42,7 +42,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin constants.
-define( 'DMLS_VERSION', '1.1.0' );
+define( 'DMLS_VERSION', '1.2.0' );
 define( 'DMLS_FOLDER', 'datametric-login-shield' );
 define( 'DMLS_MIN_PHP', '7.2' );
 

@@ -204,6 +204,16 @@ class AuditLogModule implements ModuleInterface {
 			),
 			array( '%s', '%s', '%s', '%d', '%s' )
 		);
+
+		/**
+		 * Fires after a login event is recorded. Add-ons use this for alerts.
+		 *
+		 * @param string $type     Event type (login_success|login_failed|lockout|logout).
+		 * @param string $ip       Client IP (possibly anonymized).
+		 * @param string $username Username.
+		 * @param int    $user_id  User id.
+		 */
+		do_action( 'dmls_event_logged', $type, (string) $ip, (string) $username, (int) $user_id );
 	}
 
 	/**
@@ -214,8 +224,20 @@ class AuditLogModule implements ModuleInterface {
 	public function prune() {
 		global $wpdb;
 
+		/**
+		 * Filter the audit-log retention in days. An add-on may raise this or
+		 * return 0 / a negative value to keep events indefinitely.
+		 *
+		 * @param int $days Default retention (free tier).
+		 */
+		$days = (int) apply_filters( 'dmls_audit_retention_days', self::RETENTION_DAYS );
+
+		if ( $days <= 0 ) {
+			return; // Keep everything (e.g. Pro unlimited history).
+		}
+
 		$table = Database::table_events();
-		$since = gmdate( 'Y-m-d H:i:s', time() - ( self::RETENTION_DAYS * DAY_IN_SECONDS ) );
+		$since = gmdate( 'Y-m-d H:i:s', time() - ( $days * DAY_IN_SECONDS ) );
 
 		$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom log table, no core API.
 			$wpdb->prepare( 'DELETE FROM %i WHERE created_at < %s', $table, $since )

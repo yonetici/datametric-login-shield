@@ -5,7 +5,7 @@ Tags: login, hide login, wp-login, custom login url, security
 Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 7.2
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -83,6 +83,10 @@ Datametric Login Shield is a fork of **WPS Hide Login** (GPLv2 or later), origin
 
 == Changelog ==
 
+= 1.2.0 =
+* Added extension points for the Datametric Login Shield Pro add-on: the `dmls_audit_retention_days` filter and the `dmls_event_logged` action.
+* No changes to existing behaviour.
+
 = 1.1.0 =
 * New: brute-force protection with configurable lockouts and an IP allowlist.
 * New: access hardening — block REST user enumeration, block ?author=N scans, generic login errors, optional XML-RPC disable.
@@ -100,6 +104,9 @@ Datametric Login Shield is a fork of **WPS Hide Login** (GPLv2 or later), origin
 * Fixed assignment-as-condition bugs in the original slug-resolution logic.
 
 == Upgrade Notice ==
+
+= 1.2.0 =
+Adds developer hooks for the Pro add-on; safe drop-in upgrade.
 
 = 1.1.0 =
 Adds brute-force protection, access hardening and a login audit log.
