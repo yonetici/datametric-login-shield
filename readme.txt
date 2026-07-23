@@ -61,6 +61,8 @@ By default, no — everything runs on your own server. The only exception is the
 
 Define one of these constants as `true` in `wp-config.php`, log in, fix the setting, then remove the constant: `DMLS_DISABLE_2FA`, `DMLS_DISABLE_IP_ACCESS`, or `DMLS_DISABLE_CAPTCHA`. For 2FA you can also use a backup code, or have another administrator turn it off on your profile.
 
+Note: entering the wrong two-factor code too many times counts as failed logins and may trigger the brute-force IP lockout. Wait for the lockout window to pass, use a backup code, or add your IP to the Protection allowlist.
+
 == Privacy ==
 
 Datametric Login Shield runs entirely on your own server. The only optional exception is CAPTCHA (see below).
